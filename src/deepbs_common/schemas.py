@@ -123,12 +123,39 @@ class ImageSelection(BaseModel):
     layout: str | None = None
 
 
+class AgentExecutionLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    agent_role: str
+    agent_instance_id: str
+    task_name: str
+    status: str
+    start_time: str | None = None
+    end_time: str | None = None
+    input_data: dict | None = None
+    thought_chain: list[str] = Field(default_factory=list)
+    intermediate_outputs: list[dict] = Field(default_factory=list)
+    final_output: dict | None = None
+    error_message: str | None = None
+
+
+class AgentMessage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    from_agent: str
+    to_agent: str | None = None
+    message_type: str
+    content: dict
+    timestamp: str = Field(default_factory=utc_now)
+
+
 class RunState(BaseModel):
     stage: ProjectStage = ProjectStage.created
     task_tree: list[dict[str, Any]] = Field(default_factory=list)
     retry_count: int = 0
     blocked_reason: str | None = None
     waiting_for_user: bool = False
+    agent_logs: list[AgentExecutionLog] = Field(default_factory=list)
+    agent_messages: list[AgentMessage] = Field(default_factory=list)
+    active_agents: dict[str, dict] = Field(default_factory=dict)
 
 
 class Project(BaseModel):

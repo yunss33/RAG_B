@@ -51,6 +51,14 @@ async def list_projects() -> list[Project]:
     return repository.list_projects()
 
 
+@app.get("/projects/{project_id}")
+async def get_project(project_id: str) -> Project:
+    try:
+        return repository.get_project(project_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="project not found") from exc
+
+
 @app.post("/projects", response_model=ProjectResponse)
 async def create_project(payload: CreateProjectRequest) -> ProjectResponse:
     project = Project(

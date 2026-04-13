@@ -20,6 +20,11 @@ export async function getProjectStatus(id: string) {
   return parseJson<any>(response);
 }
 
+export async function getProject(id: string) {
+  const response = await fetch(`${API_BASE}/projects/${id}`, { cache: "no-store" });
+  return parseJson<any>(response);
+}
+
 export async function getRequirements(id: string) {
   const response = await fetch(`${API_BASE}/projects/${id}/requirements`, { cache: "no-store" });
   return parseJson<any[]>(response);
