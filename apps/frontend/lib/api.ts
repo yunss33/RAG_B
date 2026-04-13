@@ -1,7 +1,4 @@
-const API_BASE =
-  process.env.INTERNAL_API_BASE_URL ??
-  process.env.NEXT_PUBLIC_API_BASE_URL ??
-  "http://localhost:8100";
+const API_BASE = "http://localhost:8100";
 
 async function parseJson<T>(response: Response): Promise<T> {
   if (!response.ok) {

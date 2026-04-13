@@ -39,14 +39,24 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
 
   useEffect(() => {
     async function loadData() {
-      const { id } = params;
-      setProjectId(id);
-      const [statusData, projectData] = await Promise.all([
-        getProjectStatus(id),
-        getProject(id),
-      ]);
-      setStatus(statusData);
-      setProject(projectData);
+      try {
+        const { id } = params;
+        console.log('Loading project data for id:', id);
+        setProjectId(id);
+        
+        console.log('Fetching project status...');
+        const statusData = await getProjectStatus(id);
+        console.log('Project status data:', statusData);
+        
+        console.log('Fetching project data...');
+        const projectData = await getProject(id);
+        console.log('Project data:', projectData);
+        
+        setStatus(statusData);
+        setProject(projectData);
+      } catch (error) {
+        console.error('Error loading project data:', error);
+      }
     }
     loadData();
   }, [params]);

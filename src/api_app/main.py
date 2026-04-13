@@ -4,6 +4,7 @@ from pathlib import Path
 
 import httpx
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 
 from deepbs_common.repository import repository
@@ -24,6 +25,15 @@ from deepbs_common.settings import settings
 from deepbs_common.storage import storage
 
 app = FastAPI(title="DeepBS API Gateway", version="0.1.0")
+
+# CORS configuration
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # In production, replace with specific origins
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 def _project_status(project: Project) -> ProjectStatusResponse:
