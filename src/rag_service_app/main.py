@@ -211,6 +211,45 @@ async def ingest_project(project_id: str) -> IngestResponse:
                 source.parse_status = "processing"
                 if source.file_type == FileType.image:
                     image_candidates += 1
+                    # 处理图片文件，提取文本内容
+                    content = _extract_text_for_file(source.object_key, source.file_name)
+                    
+                    # 为图片创建证据项
+                    hints = ["项目理解与总体响应", "技术方案与实施路径", "项目组织与服务保障", "资质、案例与附录"]
+                    for index, hint in enumerate(hints):
+                        # 为证据项生成向量
+                        evidence_content = f"{source.file_name} 提供的支撑信息 {index + 1}: {content[:160]}"
+                        evidence_vector = embedding_manager.get_embedding(evidence_content)
+                        
+                        evidence_item = EvidenceItem(
+                            section_hint=hint,
+                            content=evidence_content,
+                            source_file_id=source.id,
+                            source_name=source.file_name,
+                            location_hint=f"image-content",
+                            page_number=index + 1,
+                            confidence=0.65 + (index * 0.05),
+                            vector=evidence_vector
+                        )
+                        evidence_items.append(evidence_item)
+                        
+                        # 创建Qdrant点
+                        point = PointStruct(
+                            id=f"{project_id}_{source.id}_evidence_{index}",
+                            vector=evidence_vector,
+                            payload={
+                                "project_id": project_id,
+                                "source_file_id": source.id,
+                                "source_name": source.file_name,
+                                "content": evidence_content,
+                                "section_hint": hint,
+                                "location_hint": f"image-content",
+                                "page_number": index + 1,
+                                "confidence": 0.65 + (index * 0.05),
+                                "type": "evidence_item"
+                            }
+                        )
+                        qdrant_points.append(point)
                     source.parse_status = "indexed"
                     continue
 

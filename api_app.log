@@ -1,0 +1,1 @@
+2026-04-13 07:30:40,252 - httpx - INFO - HTTP Request: POST http://localhost:8102/internal/projects/5e27f7a0-b794-4452-a528-a66a1f9b23df/ingest "HTTP/1.1 500 Internal Server Error"
