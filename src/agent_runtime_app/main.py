@@ -1,4 +1,5 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import traceback
 import time
@@ -50,6 +51,15 @@ RATE_LIMIT_MAX_REQUESTS = 100  # 每个时间窗口的最大请求数
 ip_requests = defaultdict(lambda: deque(maxlen=RATE_LIMIT_MAX_REQUESTS))
 
 app = FastAPI(title="DeepBS Agent Runtime", version="0.1.0")
+
+# CORS配置
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 启动Prometheus metrics服务器
 start_http_server(8003)
