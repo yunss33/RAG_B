@@ -202,11 +202,17 @@ async def ingest_project(project_id: str) -> IngestResponse:
     image_candidates = 0
     qdrant_points = []
 
+    qdrant_available = False
     try:
-        # 初始化Qdrant集合
+        # 尝试初始化Qdrant集合
         qdrant_manager.create_collection()
+        qdrant_available = True
+        logger.info("Qdrant is available, using vector database")
+    except Exception as e:
+        logger.warning(f"Qdrant not available: {e}, using local storage only")
+        qdrant_available = False
 
-        for source in project.source_files:
+    for source in project.source_files:
             try:
                 source.parse_status = "processing"
                 if source.file_type == FileType.image:
@@ -317,41 +323,40 @@ async def ingest_project(project_id: str) -> IngestResponse:
                     )
                     evidence_items.append(evidence_item)
                     
-                    # 创建Qdrant点
-                    point = PointStruct(
-                        id=f"{project_id}_{source.id}_evidence_{index}",
-                        vector=evidence_vector,
-                        payload={
-                            "project_id": project_id,
-                            "source_file_id": source.id,
-                            "source_name": source.file_name,
-                            "content": evidence_content,
-                            "section_hint": hint,
-                            "location_hint": f"chunk-{index + 1}",
-                            "chunk_id": f"{project_id}_{source.id}_chunk_{index}" if index < len(chunks_with_positions) else None,
-                            "start_pos": chunks_with_positions[index][1] if index < len(chunks_with_positions) else None,
-                            "end_pos": chunks_with_positions[index][2] if index < len(chunks_with_positions) else None,
-                            "page_number": index + 1,
-                            "confidence": 0.65 + (index * 0.05),
-                            "type": "evidence_item"
-                        }
-                    )
-                    qdrant_points.append(point)
+                    # 只有在Qdrant可用时才添加Qdrant点
+                    if qdrant_available:
+                        point = PointStruct(
+                            id=f"{project_id}_{source.id}_evidence_{index}",
+                            vector=evidence_vector,
+                            payload={
+                                "project_id": project_id,
+                                "source_file_id": source.id,
+                                "source_name": source.file_name,
+                                "content": evidence_content,
+                                "section_hint": hint,
+                                "location_hint": f"chunk-{index + 1}",
+                                "chunk_id": f"{project_id}_{source.id}_chunk_{index}" if index < len(chunks_with_positions) else None,
+                                "start_pos": chunks_with_positions[index][1] if index < len(chunks_with_positions) else None,
+                                "end_pos": chunks_with_positions[index][2] if index < len(chunks_with_positions) else None,
+                                "page_number": index + 1,
+                                "confidence": 0.65 + (index * 0.05),
+                                "type": "evidence_item"
+                            }
+                        )
+                        qdrant_points.append(point)
                 
                 source.parse_status = "indexed"
             except Exception as e:
                 source.parse_status = f"error: {str(e)}"
                 continue
 
-        # 存储向量到Qdrant
-        if qdrant_points:
+        # 只有在Qdrant可用时才存储向量到Qdrant
+        if qdrant_available and qdrant_points:
             try:
                 qdrant_manager.upsert_vectors(qdrant_points)
+                logger.info(f"Successfully upserted {len(qdrant_points)} vectors to Qdrant")
             except Exception as e:
-                project.run_state.stage = ProjectStage.failed
-                project.run_state.blocked_reason = f"Qdrant storage error: {str(e)}"
-                repository.save_project(project)
-                raise HTTPException(status_code=500, detail=f"Failed to store vectors: {str(e)}") from e
+                logger.warning(f"Failed to store vectors to Qdrant: {e}, continuing with local storage only")
 
         project.evidence_items = evidence_items
         project.document_chunks = document_chunks
