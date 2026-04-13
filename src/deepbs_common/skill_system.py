@@ -222,8 +222,7 @@ class WriteDraftsSkill(Skill):
     @record_agent_execution("write_drafts")
     async def execute(self, project: Project, context: Dict[str, Any]) -> Dict[str, Any]:
         from .agent_logic import write_drafts
-        log = context.get('log')
-        result = write_drafts(project, log)
+        result = write_drafts(project)
         project.drafts = result.drafts
         return {"result": result, "project": project}
 
@@ -245,8 +244,7 @@ class ReviewProjectSkill(Skill):
     @record_agent_execution("review_project")
     async def execute(self, project: Project, context: Dict[str, Any]) -> Dict[str, Any]:
         from .agent_logic import review_project
-        log = context.get('log')
-        result = review_project(project, log)
+        result = review_project(project)
         project.review_issues = result.review_issues
         return {"result": result, "project": project}
 
@@ -268,8 +266,7 @@ class SuggestImagesSkill(Skill):
     @record_agent_execution("suggest_images")
     async def execute(self, project: Project, context: Dict[str, Any]) -> Dict[str, Any]:
         from .agent_logic import suggest_images
-        log = context.get('log')
-        result = suggest_images(project, log)
+        result = suggest_images(project)
         project.image_suggestions = result.image_suggestions
         return {"result": result, "project": project}
 
@@ -291,8 +288,7 @@ class AssembleHtmlSkill(Skill):
     @record_agent_execution("assemble_html")
     async def execute(self, project: Project, context: Dict[str, Any]) -> Dict[str, Any]:
         from .agent_logic import assemble_html
-        log = context.get('log')
-        result = assemble_html(project, log)
+        result = assemble_html(project)
         return {"result": result, "project": project}
 
 

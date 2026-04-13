@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 from collections import defaultdict
 from functools import wraps
 from typing import Any, Callable, Tuple
@@ -40,32 +41,66 @@ def clear_agent_logs():
 
 def record_agent_execution(task_name: str) -> Callable:
     def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(project: Project, *args, **kwargs) -> Any:
-            log = AgentExecutionLog(
-                agent_role="agent",
-                agent_instance_id=task_name,
-                task_name=task_name,
-                status="in_progress",
-                start_time=utc_now(),
-                thought_chain=[],
-                intermediate_outputs=[],
-            )
-            _agent_execution_context[task_name] = log
+        if asyncio.iscoroutinefunction(func):
+            @wraps(func)
+            async def async_wrapper(project: Project, *args, **kwargs) -> Any:
+                # 声明全局变量
+                global log
+                
+                log = AgentExecutionLog(
+                    agent_role="agent",
+                    agent_instance_id=task_name,
+                    task_name=task_name,
+                    status="in_progress",
+                    start_time=utc_now(),
+                    thought_chain=[],
+                    intermediate_outputs=[],
+                )
+                _agent_execution_context[task_name] = log
 
-            try:
-                result = func(project, log, *args, **kwargs)
-                log.status = "completed"
-                log.end_time = utc_now()
-                log.final_output = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
-                return result
-            except Exception as e:
-                log.status = "failed"
-                log.end_time = utc_now()
-                log.error_message = str(e)
-                raise
+                try:
+                    result = await func(project, *args, **kwargs)
+                    log.status = "completed"
+                    log.end_time = utc_now()
+                    log.final_output = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
+                    return result
+                except Exception as e:
+                    log.status = "failed"
+                    log.end_time = utc_now()
+                    log.error_message = str(e)
+                    raise
 
-        return wrapper
+            return async_wrapper
+        else:
+            @wraps(func)
+            def sync_wrapper(project: Project, *args, **kwargs) -> Any:
+                # 声明全局变量
+                global log
+                
+                log = AgentExecutionLog(
+                    agent_role="agent",
+                    agent_instance_id=task_name,
+                    task_name=task_name,
+                    status="in_progress",
+                    start_time=utc_now(),
+                    thought_chain=[],
+                    intermediate_outputs=[],
+                )
+                _agent_execution_context[task_name] = log
+
+                try:
+                    result = func(project, *args, **kwargs)
+                    log.status = "completed"
+                    log.end_time = utc_now()
+                    log.final_output = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
+                    return result
+                except Exception as e:
+                    log.status = "failed"
+                    log.end_time = utc_now()
+                    log.error_message = str(e)
+                    raise
+
+            return sync_wrapper
     return decorator
 
 
@@ -79,7 +114,7 @@ def _group_evidence(project: Project) -> dict[str, list[EvidenceItem]]:
 
 
 @record_agent_execution("parse_requirements")
-def parse_requirements(project: Project, log: AgentExecutionLog) -> RequirementResult:
+def parse_requirements(project: Project) -> RequirementResult:
     log.thought_chain.append("开始分析招标文件，提取需求项。")
     
     tender_files = [file for file in project.source_files if file.file_type == "tender"]
@@ -148,7 +183,7 @@ def parse_requirements(project: Project, log: AgentExecutionLog) -> RequirementR
 
 
 @record_agent_execution("plan_outline")
-def plan_outline(project: Project, log: AgentExecutionLog) -> OutlineResult:
+def plan_outline(project: Project) -> OutlineResult:
     log.thought_chain.append("开始规划项目大纲结构。")
     
     log.thought_chain.append("构建标准标书大纲，涵盖项目理解、技术方案、组织保障和资质附录四个核心部分。")
@@ -193,7 +228,7 @@ def plan_outline(project: Project, log: AgentExecutionLog) -> OutlineResult:
 
 
 @record_agent_execution("write_drafts")
-def write_drafts(project: Project, log: AgentExecutionLog) -> DraftResult:
+def write_drafts(project: Project) -> DraftResult:
     log.thought_chain.append("开始撰写各章节草稿。")
     
     evidence = _group_evidence(project)
@@ -273,7 +308,7 @@ def write_drafts(project: Project, log: AgentExecutionLog) -> DraftResult:
 
 
 @record_agent_execution("review_project")
-def review_project(project: Project, log: AgentExecutionLog) -> ReviewResult:
+def review_project(project: Project) -> ReviewResult:
     log.thought_chain.append("开始审查项目内容。")
     
     log.thought_chain.append(f"发现 {len(project.drafts)} 个草稿章节需要审查。")
@@ -337,7 +372,7 @@ def review_project(project: Project, log: AgentExecutionLog) -> ReviewResult:
 
 
 @record_agent_execution("suggest_images")
-def suggest_images(project: Project, log: AgentExecutionLog) -> ImageSuggestionResult:
+def suggest_images(project: Project) -> ImageSuggestionResult:
     log.thought_chain.append("开始为项目建议图片。")
     
     suggestions: list[ImageSuggestion] = []
@@ -379,7 +414,7 @@ def suggest_images(project: Project, log: AgentExecutionLog) -> ImageSuggestionR
 
 
 @record_agent_execution("assemble_html")
-def assemble_html(project: Project, log: AgentExecutionLog) -> HtmlAssembleResult:
+def assemble_html(project: Project) -> HtmlAssembleResult:
     log.thought_chain.append("开始组装 HTML 标书。")
     
     selected_map = {selection.suggestion_id: selection for selection in project.image_selections if selection.accepted}
