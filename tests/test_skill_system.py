@@ -3,6 +3,7 @@ from deepbs_common.skill_system import skill_manager
 from deepbs_common.schemas import Project
 
 
+@pytest.mark.asyncio
 async def test_skill_dependencies():
     """测试技能依赖关系检查"""
     
