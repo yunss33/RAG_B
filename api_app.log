@@ -1,1 +1,9 @@
 2026-04-13 07:30:40,252 - httpx - INFO - HTTP Request: POST http://localhost:8102/internal/projects/5e27f7a0-b794-4452-a528-a66a1f9b23df/ingest "HTTP/1.1 500 Internal Server Error"
+2026-04-13 07:48:12,149 - api_app - INFO - Health check requested
+2026-04-13 07:48:12,149 - api_app - INFO - Storage service is healthy
+2026-04-13 07:48:12,700 - httpx - INFO - HTTP Request: GET http://localhost:8102/healthz "HTTP/1.1 200 OK"
+2026-04-13 07:48:12,701 - api_app - INFO - RAG service is healthy
+2026-04-13 07:48:12,886 - httpx - INFO - HTTP Request: GET http://localhost:8101/healthz "HTTP/1.1 200 OK"
+2026-04-13 07:48:12,886 - api_app - INFO - Orchestrator service is healthy
+2026-04-13 07:48:12,887 - api_app - INFO - Health check completed with status: ok
+2026-04-13 07:48:12,969 - httpx - INFO - HTTP Request: POST http://localhost:8102/internal/projects/98c2d077-bd24-43f5-85ba-9fede3f45f58/ingest "HTTP/1.1 500 Internal Server Error"
