@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from collections import defaultdict
+from functools import wraps
+from typing import Any, Callable, Tuple
 
 from .schemas import (
+    AgentExecutionLog,
     DraftResult,
     DraftSection,
     EvidenceItem,
@@ -18,8 +21,51 @@ from .schemas import (
     ReviewIssue,
     ReviewIssueType,
     ReviewResult,
+    utc_now,
 )
 from .storage import storage
+
+
+_agent_execution_context: dict[str, AgentExecutionLog] = {}
+
+
+def get_agent_log(task_name: str) -> AgentExecutionLog | None:
+    return _agent_execution_context.get(task_name)
+
+
+def clear_agent_logs():
+    _agent_execution_context.clear()
+
+
+def record_agent_execution(task_name: str) -> Callable:
+    def decorator(func: Callable) -> Callable:
+        @wraps(func)
+        def wrapper(project: Project, *args, **kwargs) -> Any:
+            log = AgentExecutionLog(
+                agent_role="agent",
+                agent_instance_id=task_name,
+                task_name=task_name,
+                status="in_progress",
+                start_time=utc_now(),
+                thought_chain=[],
+                intermediate_outputs=[],
+            )
+            _agent_execution_context[task_name] = log
+
+            try:
+                result = func(project, log, *args, **kwargs)
+                log.status = "completed"
+                log.end_time = utc_now()
+                log.final_output = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
+                return result
+            except Exception as e:
+                log.status = "failed"
+                log.end_time = utc_now()
+                log.error_message = str(e)
+                raise
+
+        return wrapper
+    return decorator
 
 
 def _group_evidence(project: Project) -> dict[str, list[EvidenceItem]]:
@@ -30,12 +76,24 @@ def _group_evidence(project: Project) -> dict[str, list[EvidenceItem]]:
     return grouped
 
 
-def parse_requirements(project: Project) -> RequirementResult:
+@record_agent_execution("parse_requirements")
+def parse_requirements(project: Project, log: AgentExecutionLog) -> RequirementResult:
+    log.thought_chain.append("开始分析招标文件，提取需求项。")
+    
     tender_files = [file for file in project.source_files if file.file_type == "tender"]
     knowledge_files = [file for file in project.source_files if file.file_type == "knowledge"]
+    
+    log.thought_chain.append(f"找到 {len(tender_files)} 个招标文件，{len(knowledge_files)} 个知识文件。")
+    log.intermediate_outputs.append({
+        "step": "file_identification",
+        "tender_file_count": len(tender_files),
+        "knowledge_file_count": len(knowledge_files),
+    })
+    
     requirements: list[RequirementItem] = []
 
     for file in tender_files:
+        log.thought_chain.append(f"分析招标文件: {file.file_name}")
         requirements.extend(
             [
                 RequirementItem(
@@ -61,8 +119,14 @@ def parse_requirements(project: Project) -> RequirementResult:
                 ),
             ]
         )
+        log.intermediate_outputs.append({
+            "step": "analyze_tender_file",
+            "file_name": file.file_name,
+            "requirements_added": 3,
+        })
 
     if knowledge_files:
+        log.thought_chain.append("发现知识文件，添加知识复用需求。")
         requirements.append(
             RequirementItem(
                 category=RequirementCategory.chapter,
@@ -72,11 +136,20 @@ def parse_requirements(project: Project) -> RequirementResult:
                 risk_level="low",
             )
         )
+        log.intermediate_outputs.append({
+            "step": "add_knowledge_requirement",
+            "requirements_added": 1,
+        })
 
+    log.thought_chain.append(f"需求分析完成，共提取 {len(requirements)} 个需求项。")
     return RequirementResult(requirements=requirements)
 
 
-def plan_outline(project: Project) -> OutlineResult:
+@record_agent_execution("plan_outline")
+def plan_outline(project: Project, log: AgentExecutionLog) -> OutlineResult:
+    log.thought_chain.append("开始规划项目大纲结构。")
+    
+    log.thought_chain.append("构建标准标书大纲，涵盖项目理解、技术方案、组织保障和资质附录四个核心部分。")
     sections = [
         OutlineSection(
             code="1",
@@ -103,14 +176,37 @@ def plan_outline(project: Project) -> OutlineResult:
             evidence_requirements=["企业资质", "案例材料", "附件清单"],
         ),
     ]
+    
+    log.intermediate_outputs.append({
+        "step": "outline_created",
+        "section_count": len(sections),
+        "sections": [
+            {"code": s.code, "title": s.title}
+            for s in sections
+        ],
+    })
+    
+    log.thought_chain.append(f"大纲规划完成，共创建 {len(sections)} 个章节。")
     return OutlineResult(outline=sections)
 
 
-def write_drafts(project: Project) -> DraftResult:
+@record_agent_execution("write_drafts")
+def write_drafts(project: Project, log: AgentExecutionLog) -> DraftResult:
+    log.thought_chain.append("开始撰写各章节草稿。")
+    
     evidence = _group_evidence(project)
+    log.thought_chain.append(f"已分组证据，共 {len(evidence)} 个证据分组。")
+    log.intermediate_outputs.append({
+        "step": "evidence_grouped",
+        "group_count": len(evidence),
+        "group_keys": list(evidence.keys()),
+    })
+    
     drafts: list[DraftSection] = []
-    for section in project.outline:
+    for index, section in enumerate(project.outline):
+        log.thought_chain.append(f"正在撰写第 {index+1} 章节: {section.title}")
         section_evidence = evidence.get(section.title, [])[:2] or evidence.get("all", [])[:2]
+        
         body = [
             f"### {section.title}",
             "",
@@ -126,22 +222,45 @@ def write_drafts(project: Project) -> DraftResult:
             body.append("当前缺少直接证据，需补充企业资料或历史案例。")
         body.append("")
         body.append("本节建议在后续版本中补充定量指标、时间计划和责任矩阵。")
-        drafts.append(
-            DraftSection(
-                outline_section_id=section.id,
-                title=section.title,
-                content="\n".join(body),
-                evidence_ids=[item.id for item in section_evidence],
-                missing_inputs=[] if section_evidence else ["缺少直接证据"],
-            )
+        
+        draft = DraftSection(
+            outline_section_id=section.id,
+            title=section.title,
+            content="\n".join(body),
+            evidence_ids=[item.id for item in section_evidence],
+            missing_inputs=[] if section_evidence else ["缺少直接证据"],
         )
+        drafts.append(draft)
+        
+        log.intermediate_outputs.append({
+            "step": "draft_written",
+            "section_index": index,
+            "section_title": section.title,
+            "evidence_count": len(section_evidence),
+            "has_missing_inputs": bool(draft.missing_inputs),
+        })
+
+    log.thought_chain.append(f"草稿撰写完成，共完成 {len(drafts)} 个章节。")
     return DraftResult(drafts=drafts)
 
 
-def review_project(project: Project) -> ReviewResult:
+@record_agent_execution("review_project")
+def review_project(project: Project, log: AgentExecutionLog) -> ReviewResult:
+    log.thought_chain.append("开始审查项目内容。")
+    
+    log.thought_chain.append(f"发现 {len(project.drafts)} 个草稿章节需要审查。")
+    log.thought_chain.append(f"项目共有 {len(project.source_files)} 个源文件。")
+    log.intermediate_outputs.append({
+        "step": "review_start",
+        "draft_count": len(project.drafts),
+        "source_file_count": len(project.source_files),
+    })
+    
     issues: list[ReviewIssue] = []
-    for draft in project.drafts:
+    for index, draft in enumerate(project.drafts):
+        log.thought_chain.append(f"正在审查章节: {draft.title}")
         if not draft.evidence_ids:
+            log.thought_chain.append(f"发现问题: 章节 {draft.title} 没有绑定证据。")
             issues.append(
                 ReviewIssue(
                     issue_type=ReviewIssueType.compliance,
@@ -152,6 +271,7 @@ def review_project(project: Project) -> ReviewResult:
                 )
             )
         if "资质" in draft.title:
+            log.thought_chain.append(f"发现问题: 资质章节 {draft.title} 可优化。")
             issues.append(
                 ReviewIssue(
                     issue_type=ReviewIssueType.scoring,
@@ -161,8 +281,15 @@ def review_project(project: Project) -> ReviewResult:
                     suggested_action="增加评分点映射表和案例对应说明。",
                 )
             )
+        log.intermediate_outputs.append({
+            "step": "review_draft",
+            "draft_index": index,
+            "section_title": draft.title,
+            "issues_found_in_section": sum(1 for i in issues if i.section_title == draft.title),
+        })
 
     if not project.source_files:
+        log.thought_chain.append("发现问题: 项目未上传任何源文件。")
         issues.append(
             ReviewIssue(
                 issue_type=ReviewIssueType.consistency,
@@ -172,33 +299,71 @@ def review_project(project: Project) -> ReviewResult:
                 suggested_action="先上传招标文件和企业知识资料。",
             )
         )
+        log.intermediate_outputs.append({
+            "step": "review_overall",
+            "has_missing_source_files": True,
+        })
 
+    log.thought_chain.append(f"审查完成，共发现 {len(issues)} 个问题。")
     return ReviewResult(review_issues=issues)
 
 
-def suggest_images(project: Project) -> ImageSuggestionResult:
+@record_agent_execution("suggest_images")
+def suggest_images(project: Project, log: AgentExecutionLog) -> ImageSuggestionResult:
+    log.thought_chain.append("开始为项目建议图片。")
+    
     suggestions: list[ImageSuggestion] = []
     image_files = [file for file in project.source_files if file.file_type == "image"]
     outline_titles = [section.title for section in project.outline] or ["技术方案与实施路径"]
+    
+    log.thought_chain.append(f"发现 {len(image_files)} 个图片文件，{len(outline_titles)} 个大纲章节。")
+    log.intermediate_outputs.append({
+        "step": "image_discovery",
+        "image_file_count": len(image_files),
+        "outline_section_count": len(outline_titles),
+    })
+    
     for index, file in enumerate(image_files[:6]):
         section_title = outline_titles[index % len(outline_titles)]
-        suggestions.append(
-            ImageSuggestion(
-                source_file_id=file.id,
-                source_name=file.file_name,
-                suggested_section_title=section_title,
-                usage_label="产品图" if "产品" in file.file_name else "项目示意图",
-                placement="section-body-after-first-paragraph",
-                caption=f"{section_title}配图：{file.file_name}",
-                preview_url=storage.get_file_url(file.object_key),
-            )
+        log.thought_chain.append(f"为图片 {file.file_name} 建议放入章节: {section_title}")
+        
+        suggestion = ImageSuggestion(
+            source_file_id=file.id,
+            source_name=file.file_name,
+            suggested_section_title=section_title,
+            usage_label="产品图" if "产品" in file.file_name else "项目示意图",
+            placement="section-body-after-first-paragraph",
+            caption=f"{section_title}配图：{file.file_name}",
+            preview_url=storage.get_file_url(file.object_key),
         )
+        suggestions.append(suggestion)
+        
+        log.intermediate_outputs.append({
+            "step": "image_suggestion",
+            "suggestion_index": index,
+            "file_name": file.file_name,
+            "suggested_section": section_title,
+            "usage_label": suggestion.usage_label,
+        })
+
+    log.thought_chain.append(f"图片建议完成，共推荐 {len(suggestions)} 张图片。")
     return ImageSuggestionResult(image_suggestions=suggestions)
 
 
-def assemble_html(project: Project) -> HtmlAssembleResult:
+@record_agent_execution("assemble_html")
+def assemble_html(project: Project, log: AgentExecutionLog) -> HtmlAssembleResult:
+    log.thought_chain.append("开始组装 HTML 标书。")
+    
     selected_map = {selection.suggestion_id: selection for selection in project.image_selections if selection.accepted}
     image_by_suggestion = {suggestion.id: suggestion for suggestion in project.image_suggestions}
+    
+    log.thought_chain.append(f"发现 {len(selected_map)} 个已接受的图片选择，{len(project.drafts)} 个草稿章节。")
+    log.intermediate_outputs.append({
+        "step": "html_assembly_start",
+        "accepted_image_count": len(selected_map),
+        "draft_count": len(project.drafts),
+        "review_issue_count": len(project.review_issues),
+    })
 
     parts = [
         "<!DOCTYPE html>",
@@ -218,8 +383,12 @@ def assemble_html(project: Project) -> HtmlAssembleResult:
     for draft in project.drafts:
         parts.append(f'<li><a href="#{draft.outline_section_id}">{draft.title}</a></li>')
     parts.append("</ul></nav>")
+    
+    log.thought_chain.append("目录生成完成。")
 
-    for draft in project.drafts:
+    image_count_inserted = 0
+    for index, draft in enumerate(project.drafts):
+        log.thought_chain.append(f"正在组装章节: {draft.title}")
         parts.append(f'<section id="{draft.outline_section_id}">')
         parts.append(f"<h2>{draft.title}</h2>")
         for paragraph in draft.content.split("\n\n"):
@@ -232,13 +401,33 @@ def assemble_html(project: Project) -> HtmlAssembleResult:
                 parts.append(f'<img src="{suggestion.preview_url or ""}" alt="{suggestion.caption}" />')
                 parts.append(f"<figcaption>{suggestion.caption}</figcaption>")
                 parts.append("</figure>")
+                image_count_inserted += 1
         parts.append("</section>")
+        
+        log.intermediate_outputs.append({
+            "step": "assemble_section",
+            "section_index": index,
+            "section_title": draft.title,
+            "images_inserted": sum(1 for s_id in selected_map 
+                                   if image_by_suggestion.get(s_id) 
+                                   and image_by_suggestion.get(s_id).suggested_section_title == draft.title),
+        })
 
     if project.review_issues:
+        log.thought_chain.append("添加审查摘要部分。")
         parts.append("<section><h2>审查摘要</h2><ul>")
         for issue in project.review_issues:
             parts.append(f"<li>[{issue.severity}] {issue.section_title}: {issue.message}</li>")
         parts.append("</ul></section>")
 
     parts.extend(["</body>", "</html>"])
+    
+    log.thought_chain.append(f"HTML 组装完成，共插入 {image_count_inserted} 张图片。")
+    log.intermediate_outputs.append({
+        "step": "html_completed",
+        "total_images_inserted": image_count_inserted,
+        "total_sections": len(project.drafts),
+        "has_review_summary": bool(project.review_issues),
+    })
+    
     return HtmlAssembleResult(html="\n".join(parts))

@@ -2,6 +2,8 @@ from fastapi import FastAPI
 
 from deepbs_common.agent_logic import (
     assemble_html,
+    clear_agent_logs,
+    get_agent_log,
     parse_requirements,
     plan_outline,
     review_project,
@@ -9,6 +11,7 @@ from deepbs_common.agent_logic import (
     write_drafts,
 )
 from deepbs_common.schemas import (
+    AgentExecutionLog,
     AgentRequest,
     DraftResult,
     HtmlAssembleResult,
@@ -28,30 +31,47 @@ async def healthz() -> dict[str, str]:
 
 @app.post("/internal/parse-tender", response_model=RequirementResult)
 async def parse_tender(request: AgentRequest) -> RequirementResult:
-    return parse_requirements(request.project)
+    clear_agent_logs()
+    result = parse_requirements(request.project)
+    return result
 
 
 @app.post("/internal/plan-outline", response_model=OutlineResult)
 async def plan(request: AgentRequest) -> OutlineResult:
-    return plan_outline(request.project)
+    clear_agent_logs()
+    result = plan_outline(request.project)
+    return result
 
 
 @app.post("/internal/write-drafts", response_model=DraftResult)
 async def write(request: AgentRequest) -> DraftResult:
-    return write_drafts(request.project)
+    clear_agent_logs()
+    result = write_drafts(request.project)
+    return result
 
 
 @app.post("/internal/review", response_model=ReviewResult)
 async def review(request: AgentRequest) -> ReviewResult:
-    return review_project(request.project)
+    clear_agent_logs()
+    result = review_project(request.project)
+    return result
 
 
 @app.post("/internal/suggest-images", response_model=ImageSuggestionResult)
 async def images(request: AgentRequest) -> ImageSuggestionResult:
-    return suggest_images(request.project)
+    clear_agent_logs()
+    result = suggest_images(request.project)
+    return result
 
 
 @app.post("/internal/assemble-html", response_model=HtmlAssembleResult)
 async def html(request: AgentRequest) -> HtmlAssembleResult:
-    return assemble_html(request.project)
+    clear_agent_logs()
+    result = assemble_html(request.project)
+    return result
+
+
+@app.get("/internal/agent-log/{task_name}", response_model=AgentExecutionLog | None)
+async def get_agent_execution_log(task_name: str):
+    return get_agent_log(task_name)
 
