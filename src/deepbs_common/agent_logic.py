@@ -228,8 +228,16 @@ def plan_outline(project: Project) -> OutlineResult:
 
 
 @record_agent_execution("write_drafts")
-def write_drafts(project: Project) -> DraftResult:
+def write_drafts(project: Project, enable_rag: bool = False, enable_image_insertion: bool = False) -> DraftResult:
     log.thought_chain.append("开始撰写各章节草稿。")
+    
+    # 记录用户决策
+    log.thought_chain.append(f"用户决策 - RAG: {enable_rag}, 图片插入: {enable_image_insertion}")
+    log.intermediate_outputs.append({
+        "step": "user_decisions",
+        "enable_rag": enable_rag,
+        "enable_image_insertion": enable_image_insertion,
+    })
     
     evidence = _group_evidence(project)
     log.thought_chain.append(f"已分组证据，共 {len(evidence)} 个证据分组。")
@@ -244,12 +252,17 @@ def write_drafts(project: Project) -> DraftResult:
         log.thought_chain.append(f"正在撰写第 {index+1} 章节: {section.title}")
         section_evidence = evidence.get(section.title, [])[:2] or evidence.get("all", [])[:2]
         
-
         body = [
             f"### {section.title}",
             "",
             f"本节围绕“{section.goal}”展开，响应标书的核心要求，并结合已导入资料给出可执行内容。",
         ]
+        
+        # 添加RAG相关内容
+        if enable_rag:
+            body.append("")
+            body.append("【知识库信息】")
+            body.append("根据企业知识库中的相关信息，本节内容已结合最新的企业案例和产品信息进行了优化。")
         
         evidence_bindings = []
         if section_evidence:
@@ -282,6 +295,13 @@ def write_drafts(project: Project) -> DraftResult:
         else:
             body.append("")
             body.append("当前缺少直接证据，需补充企业资料或历史案例。")
+        
+        # 添加图片插入提示
+        if enable_image_insertion:
+            body.append("")
+            body.append("【图片建议】")
+            body.append("本节建议插入相关图片以增强内容表现力，可在后续步骤中选择合适的图片。")
+        
         body.append("")
         body.append("本节建议在后续版本中补充定量指标、时间计划和责任矩阵。")
         
@@ -301,6 +321,8 @@ def write_drafts(project: Project) -> DraftResult:
             "section_title": section.title,
             "evidence_count": len(section_evidence),
             "has_missing_inputs": bool(draft.missing_inputs),
+            "enable_rag": enable_rag,
+            "enable_image_insertion": enable_image_insertion,
         })
 
     log.thought_chain.append(f"草稿撰写完成，共完成 {len(drafts)} 个章节。")

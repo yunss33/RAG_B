@@ -288,3 +288,71 @@ async def confirm_outline_section(section_id: str, request: AgentRequest):
             content={"error": str(e)}
         )
 
+
+@app.post("/internal/answer-questions")
+async def answer_questions(request: dict):
+    """处理用户对问题的回答"""
+    try:
+        project = request.get("project")
+        answers = request.get("answers", [])
+        
+        if not project:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "项目信息缺失"}
+            )
+        
+        # 处理每个回答
+        for answer in answers:
+            question_id = answer.get("question_id")
+            response = answer.get("response")
+            question_type = answer.get("question_type")
+            
+            if question_type == "section_confirmation":
+                # 处理章节确认
+                if response == "确认":
+                    # 查找并确认章节
+                    for section in project.get("outline", []):
+                        if section.get("id") == question_id:
+                            section["confirmed"] = True
+                            break
+                elif response == "修改":
+                    # 标记章节需要修改
+                    for section in project.get("outline", []):
+                        if section.get("id") == question_id:
+                            section["status"] = "needs_modification"
+                            break
+                elif response == "删除":
+                    # 从大纲中移除章节
+                    project["outline"] = [
+                        section for section in project.get("outline", [])
+                        if section.get("id") != question_id
+                    ]
+            
+            elif question_type == "image_insertion":
+                # 处理图片插入决策
+                if response == "是":
+                    project["config"]["enable_image_insertion"] = True
+                else:
+                    project["config"]["enable_image_insertion"] = False
+            
+            elif question_type == "rag_source":
+                # 处理RAG信息来源决策
+                if response == "是":
+                    project["config"]["enable_rag"] = True
+                else:
+                    project["config"]["enable_rag"] = False
+        
+        # 检查是否所有章节都已确认
+        if project.get("outline"):
+            all_confirmed = all(section.get("confirmed", False) for section in project["outline"])
+            if all_confirmed:
+                project["outline_confirmed"] = True
+        
+        return {"status": "success", "message": "问题回答处理成功", "project": project}
+    except Exception as e:
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(e)}
+        )
+

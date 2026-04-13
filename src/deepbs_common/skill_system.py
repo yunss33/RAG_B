@@ -193,7 +193,7 @@ class PlanOutlineSkill(Skill):
             description="规划项目大纲结构",
             category="analysis",
             input_schema={"project": "Project"},
-            output_schema={"outline": "List[OutlineSection]"},
+            output_schema={"outline": "List[OutlineSection]", "questions": "List[Dict]"},
             dependencies=["parse_requirements"]
         )
     
@@ -202,7 +202,51 @@ class PlanOutlineSkill(Skill):
         from .agent_logic import plan_outline
         result = plan_outline(project)
         project.outline = result.outline
-        return {"result": result, "project": project}
+        
+        # 生成用户参与问题
+        questions = []
+        
+        # 为每个章节生成问题
+        for section in project.outline:
+            questions.append({
+                "id": section.id,
+                "type": "section_confirmation",
+                "section_id": section.id,
+                "section_title": section.title,
+                "question": f"确认章节 '{section.title}' 的大纲结构是否合理？",
+                "options": ["确认", "修改", "删除"],
+                "required": True
+            })
+        
+        # 图片插入相关问题
+        if project.source_files:
+            image_files = [f for f in project.source_files if f.file_type == "image"]
+            if image_files:
+                questions.append({
+                    "id": f"image_{project.id}",
+                    "type": "image_insertion",
+                    "question": "是否需要为章节插入图片？",
+                    "options": ["是", "否"],
+                    "required": True
+                })
+        
+        # 信息来源RAG相关问题
+        if project.source_files:
+            knowledge_files = [f for f in project.source_files if f.file_type == "knowledge"]
+            if knowledge_files:
+                questions.append({
+                    "id": f"rag_{project.id}",
+                    "type": "rag_source",
+                    "question": "是否需要从知识库中获取信息来丰富内容？",
+                    "options": ["是", "否"],
+                    "required": True
+                })
+        
+        # 添加问题到结果中
+        result_dict = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
+        result_dict['questions'] = questions
+        
+        return {"result": result_dict, "project": project}
 
 
 class WriteDraftsSkill(Skill):
@@ -232,7 +276,12 @@ class WriteDraftsSkill(Skill):
         if not project.outline_confirmed:
             project.outline_confirmed = True
         
-        result = write_drafts(project)
+        # 检查用户的决策
+        enable_rag = project.config.get("enable_rag", False)
+        enable_image_insertion = project.config.get("enable_image_insertion", False)
+        
+        # 传递用户决策给write_drafts函数
+        result = write_drafts(project, enable_rag=enable_rag, enable_image_insertion=enable_image_insertion)
         project.drafts = result.drafts
         return {"result": result, "project": project}
 
