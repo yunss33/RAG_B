@@ -12,6 +12,7 @@ export interface Project {
     enable_image_insertion: boolean;
     enable_rag: boolean;
   };
+  source_files?: any[];
 }
 
 export interface OutlineSection {
@@ -45,6 +46,23 @@ export async function healthCheck(): Promise<ApiResponse<any>> {
 export async function getSkills(): Promise<ApiResponse<any>> {
   try {
     const response = await fetch(`${API_BASE_URL}/internal/skills`);
+    const data = await response.json();
+    return { status: response.ok ? 'success' : 'error', result: data };
+  } catch (error) {
+    return { status: 'error', error: (error as Error).message };
+  }
+}
+
+// 解析需求
+export async function parseRequirements(project: Project): Promise<ApiResponse<any>> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/internal/parse-tender`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ project }),
+    });
     const data = await response.json();
     return { status: response.ok ? 'success' : 'error', result: data };
   } catch (error) {

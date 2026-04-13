@@ -161,45 +161,45 @@ async def healthz() -> dict:
     return health_status
 
 
-@app.post("/internal/parse-tender", response_model=RequirementResult)
-async def parse_tender(request: AgentRequest) -> RequirementResult:
+@app.post("/internal/parse-tender")
+async def parse_tender(request: AgentRequest) -> dict:
     clear_agent_logs()
-    result = await run_agent_workflow(request.project, "parse")
+    result = await skill_manager.execute_skill("parse_requirements", request.project, {})
     return result
 
 
-@app.post("/internal/plan-outline", response_model=OutlineResult)
-async def plan(request: AgentRequest) -> OutlineResult:
+@app.post("/internal/plan-outline")
+async def plan(request: AgentRequest) -> dict:
     clear_agent_logs()
-    result = await run_agent_workflow(request.project, "plan")
+    result = await skill_manager.execute_skill("plan_outline", request.project, {})
     return result
 
 
-@app.post("/internal/write-drafts", response_model=DraftResult)
-async def write(request: AgentRequest) -> DraftResult:
+@app.post("/internal/write-drafts")
+async def write(request: AgentRequest) -> dict:
     clear_agent_logs()
-    result = await run_agent_workflow(request.project, "write")
+    result = await skill_manager.execute_skill("write_drafts", request.project, {})
     return result
 
 
-@app.post("/internal/review", response_model=ReviewResult)
-async def review(request: AgentRequest) -> ReviewResult:
+@app.post("/internal/review")
+async def review(request: AgentRequest) -> dict:
     clear_agent_logs()
-    result = await run_agent_workflow(request.project, "review")
+    result = await skill_manager.execute_skill("review_project", request.project, {})
     return result
 
 
-@app.post("/internal/suggest-images", response_model=ImageSuggestionResult)
-async def images(request: AgentRequest) -> ImageSuggestionResult:
+@app.post("/internal/suggest-images")
+async def images(request: AgentRequest) -> dict:
     clear_agent_logs()
-    result = await run_agent_workflow(request.project, "images")
+    result = await skill_manager.execute_skill("suggest_images", request.project, {})
     return result
 
 
-@app.post("/internal/assemble-html", response_model=HtmlAssembleResult)
-async def html(request: AgentRequest) -> HtmlAssembleResult:
+@app.post("/internal/assemble-html")
+async def html(request: AgentRequest) -> dict:
     clear_agent_logs()
-    result = await run_agent_workflow(request.project, "assemble")
+    result = await skill_manager.execute_skill("assemble_html", request.project, {})
     return result
 
 
