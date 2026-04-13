@@ -222,6 +222,16 @@ class WriteDraftsSkill(Skill):
     @record_agent_execution("write_drafts")
     async def execute(self, project: Project, context: Dict[str, Any]) -> Dict[str, Any]:
         from .agent_logic import write_drafts
+        
+        # 检查每个章节是否已确认
+        unconfirmed_sections = [section.title for section in project.outline if not section.confirmed]
+        if unconfirmed_sections:
+            raise ValueError(f"以下章节大纲未确认：{', '.join(unconfirmed_sections)}。请先确认所有章节大纲后再执行此技能。")
+        
+        # 如果所有章节都已确认，自动设置项目大纲确认状态
+        if not project.outline_confirmed:
+            project.outline_confirmed = True
+        
         result = write_drafts(project)
         project.drafts = result.drafts
         return {"result": result, "project": project}

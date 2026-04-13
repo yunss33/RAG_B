@@ -100,6 +100,7 @@ class OutlineSection(BaseModel):
     goal: str
     evidence_requirements: list[str] = Field(default_factory=list)
     status: str = "planned"
+    confirmed: bool = False
 
 
 class EvidenceBinding(BaseModel):
@@ -199,6 +200,7 @@ class Project(BaseModel):
     source_files: list[SourceFile] = Field(default_factory=list)
     requirements: list[RequirementItem] = Field(default_factory=list)
     outline: list[OutlineSection] = Field(default_factory=list)
+    outline_confirmed: bool = False
     evidence_items: list[EvidenceItem] = Field(default_factory=list)
     document_chunks: list[DocumentChunk] = Field(default_factory=list)
     drafts: list[DraftSection] = Field(default_factory=list)

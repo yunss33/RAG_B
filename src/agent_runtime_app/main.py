@@ -234,3 +234,57 @@ async def execute_skill(skill_name: str, request: AgentRequest):
             content={"error": str(e)}
         )
 
+
+@app.post("/internal/outline/confirm")
+async def confirm_outline(request: AgentRequest):
+    """确认项目大纲"""
+    try:
+        project = request.project
+        
+        # 确认整个项目的大纲
+        project.outline_confirmed = True
+        
+        # 确认所有章节大纲
+        for section in project.outline:
+            section.confirmed = True
+        
+        return {"status": "success", "message": "大纲确认成功"}
+    except Exception as e:
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(e)}
+        )
+
+
+@app.post("/internal/outline/confirm-section/{section_id}")
+async def confirm_outline_section(section_id: str, request: AgentRequest):
+    """确认单个章节大纲"""
+    try:
+        project = request.project
+        
+        # 查找并确认指定章节
+        section_found = False
+        for section in project.outline:
+            if section.id == section_id:
+                section.confirmed = True
+                section_found = True
+                break
+        
+        if not section_found:
+            return JSONResponse(
+                status_code=404,
+                content={"error": f"章节ID {section_id} 不存在"}
+            )
+        
+        # 检查是否所有章节都已确认
+        all_confirmed = all(section.confirmed for section in project.outline)
+        if all_confirmed:
+            project.outline_confirmed = True
+        
+        return {"status": "success", "message": "章节大纲确认成功"}
+    except Exception as e:
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(e)}
+        )
+

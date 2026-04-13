@@ -121,4 +121,9 @@ async def run_agent_workflow(project: Project, task: str) -> Any:
     }
     
     result = await compiled_workflow.ainvoke(initial_state)
+    
+    # 检查是否有错误
+    if result.get("error"):
+        raise Exception(result["error"])
+    
     return result
