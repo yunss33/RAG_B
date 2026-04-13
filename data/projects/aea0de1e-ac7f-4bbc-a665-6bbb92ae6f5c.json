@@ -1,0 +1,40 @@
+{
+  "id": "aea0de1e-ac7f-4bbc-a665-6bbb92ae6f5c",
+  "name": "Integration Test Project",
+  "description": "Test project for integration testing",
+  "target_language": "zh-CN",
+  "created_by": "admin",
+  "created_at": "2026-04-13T07:18:20.720614+00:00",
+  "config": {},
+  "run_state": {
+    "stage": "failed",
+    "task_tree": [],
+    "retry_count": 0,
+    "blocked_reason": "RAG service returned error: {\"detail\":\"Ingest failed: [Errno 111] Connection refused\"}",
+    "waiting_for_user": false,
+    "agent_logs": [],
+    "agent_messages": [],
+    "active_agents": {}
+  },
+  "source_files": [
+    {
+      "id": "5b546564-b4b4-4031-ad93-5b9490b4bffb",
+      "file_name": "test_tender.txt",
+      "file_type": "tender",
+      "object_key": "6e4b8053-a939-4414-ab15-4682c70d86a7.txt",
+      "mime_type": "text/plain",
+      "parse_status": "uploaded",
+      "version": 1,
+      "created_at": "2026-04-13T07:18:20.723899+00:00"
+    }
+  ],
+  "requirements": [],
+  "outline": [],
+  "evidence_items": [],
+  "document_chunks": [],
+  "drafts": [],
+  "review_issues": [],
+  "image_suggestions": [],
+  "image_selections": [],
+  "final_html_object_key": null
+}

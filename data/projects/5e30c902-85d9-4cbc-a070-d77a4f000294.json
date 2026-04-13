@@ -1,0 +1,29 @@
+{
+  "id": "5e30c902-85d9-4cbc-a070-d77a4f000294",
+  "name": "Test Project",
+  "description": "Test Description",
+  "target_language": "zh-CN",
+  "created_by": "admin",
+  "created_at": "2026-04-13T07:18:20.405017+00:00",
+  "config": {},
+  "run_state": {
+    "stage": "created",
+    "task_tree": [],
+    "retry_count": 0,
+    "blocked_reason": null,
+    "waiting_for_user": false,
+    "agent_logs": [],
+    "agent_messages": [],
+    "active_agents": {}
+  },
+  "source_files": [],
+  "requirements": [],
+  "outline": [],
+  "evidence_items": [],
+  "document_chunks": [],
+  "drafts": [],
+  "review_issues": [],
+  "image_suggestions": [],
+  "image_selections": [],
+  "final_html_object_key": null
+}
