@@ -7,10 +7,7 @@ from .schemas import (
     Project, RequirementResult, OutlineResult, DraftResult, ReviewResult, 
     ImageSuggestionResult, HtmlAssembleResult, AgentExecutionLog, utc_now
 )
-from .agent_logic import (
-    parse_requirements, plan_outline, write_drafts, review_project, 
-    suggest_images, assemble_html
-)
+from .skill_system import skill_manager
 
 
 class AgentState(TypedDict):
@@ -23,60 +20,42 @@ class AgentState(TypedDict):
     error: Optional[str] = None
 
 
-def parse_requirements_node(state: AgentState) -> Dict[str, Any]:
-    """解析招标文件节点"""
+async def skill_execution_node(state: AgentState) -> Dict[str, Any]:
+    """技能执行节点"""
     project = state["project"]
+    task = state["task"]
     
-    # 创建执行日志
-    log = AgentExecutionLog(
-        agent_role="parser",
-        agent_instance_id="parser-1",
-        task_name="parse_requirements",
-        status="running",
-        start_time=utc_now(),
-        thought_chain=[],
-        intermediate_outputs=[]
-    )
+    # 映射任务名称到技能名称
+    task_skill_map = {
+        "parse": "parse_requirements",
+        "parse_requirements": "parse_requirements",
+        "plan": "plan_outline",
+        "plan_outline": "plan_outline",
+        "write": "write_drafts",
+        "write_drafts": "write_drafts",
+        "review": "review_project",
+        "review_project": "review_project",
+        "images": "suggest_images",
+        "suggest_images": "suggest_images",
+        "assemble": "assemble_html",
+        "assemble_html": "assemble_html"
+    }
     
-    try:
-        result = parse_requirements(project, log)
-        log.status = "completed"
-        log.end_time = utc_now()
-        log.final_output = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
-        
-        # 更新项目
-        project.requirements = result.requirements
-        
-        return {
-            "project": project,
-            "result": result,
-            "agent_logs": state["agent_logs"] + [log],
-            "current_log": log,
-            "error": None
-        }
-    except Exception as e:
-        log.status = "failed"
-        log.end_time = utc_now()
-        log.error_message = str(e)
-        
+    skill_name = task_skill_map.get(task)
+    if not skill_name:
         return {
             "project": project,
             "result": None,
-            "agent_logs": state["agent_logs"] + [log],
-            "current_log": log,
-            "error": str(e)
+            "agent_logs": state["agent_logs"],
+            "current_log": None,
+            "error": f"Unknown task: {task}"
         }
-
-
-def plan_outline_node(state: AgentState) -> Dict[str, Any]:
-    """规划大纲节点"""
-    project = state["project"]
     
     # 创建执行日志
     log = AgentExecutionLog(
-        agent_role="planner",
-        agent_instance_id="planner-1",
-        task_name="plan_outline",
+        agent_role=skill_name.split('_')[0],
+        agent_instance_id=f"{skill_name}-1",
+        task_name=skill_name,
         status="running",
         start_time=utc_now(),
         thought_chain=[],
@@ -84,197 +63,16 @@ def plan_outline_node(state: AgentState) -> Dict[str, Any]:
     )
     
     try:
-        result = plan_outline(project, log)
+        # 执行技能
+        result = await skill_manager.execute_skill(skill_name, project, {"log": log})
+        
         log.status = "completed"
         log.end_time = utc_now()
-        log.final_output = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
-        
-        # 更新项目
-        project.outline = result.outline
+        log.final_output = result["result"].model_dump() if hasattr(result["result"], 'model_dump') else dict(result["result"])
         
         return {
-            "project": project,
-            "result": result,
-            "agent_logs": state["agent_logs"] + [log],
-            "current_log": log,
-            "error": None
-        }
-    except Exception as e:
-        log.status = "failed"
-        log.end_time = utc_now()
-        log.error_message = str(e)
-        
-        return {
-            "project": project,
-            "result": None,
-            "agent_logs": state["agent_logs"] + [log],
-            "current_log": log,
-            "error": str(e)
-        }
-
-
-def write_drafts_node(state: AgentState) -> Dict[str, Any]:
-    """撰写草稿节点"""
-    project = state["project"]
-    
-    # 创建执行日志
-    log = AgentExecutionLog(
-        agent_role="writer",
-        agent_instance_id="writer-1",
-        task_name="write_drafts",
-        status="running",
-        start_time=utc_now(),
-        thought_chain=[],
-        intermediate_outputs=[]
-    )
-    
-    try:
-        result = write_drafts(project, log)
-        log.status = "completed"
-        log.end_time = utc_now()
-        log.final_output = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
-        
-        # 更新项目
-        project.drafts = result.drafts
-        
-        return {
-            "project": project,
-            "result": result,
-            "agent_logs": state["agent_logs"] + [log],
-            "current_log": log,
-            "error": None
-        }
-    except Exception as e:
-        log.status = "failed"
-        log.end_time = utc_now()
-        log.error_message = str(e)
-        
-        return {
-            "project": project,
-            "result": None,
-            "agent_logs": state["agent_logs"] + [log],
-            "current_log": log,
-            "error": str(e)
-        }
-
-
-def review_project_node(state: AgentState) -> Dict[str, Any]:
-    """审查项目节点"""
-    project = state["project"]
-    
-    # 创建执行日志
-    log = AgentExecutionLog(
-        agent_role="reviewer",
-        agent_instance_id="reviewer-1",
-        task_name="review_project",
-        status="running",
-        start_time=utc_now(),
-        thought_chain=[],
-        intermediate_outputs=[]
-    )
-    
-    try:
-        result = review_project(project, log)
-        log.status = "completed"
-        log.end_time = utc_now()
-        log.final_output = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
-        
-        # 更新项目
-        project.review_issues = result.review_issues
-        
-        return {
-            "project": project,
-            "result": result,
-            "agent_logs": state["agent_logs"] + [log],
-            "current_log": log,
-            "error": None
-        }
-    except Exception as e:
-        log.status = "failed"
-        log.end_time = utc_now()
-        log.error_message = str(e)
-        
-        return {
-            "project": project,
-            "result": None,
-            "agent_logs": state["agent_logs"] + [log],
-            "current_log": log,
-            "error": str(e)
-        }
-
-
-def suggest_images_node(state: AgentState) -> Dict[str, Any]:
-    """建议图片节点"""
-    project = state["project"]
-    
-    # 创建执行日志
-    log = AgentExecutionLog(
-        agent_role="image_agent",
-        agent_instance_id="image-1",
-        task_name="suggest_images",
-        status="running",
-        start_time=utc_now(),
-        thought_chain=[],
-        intermediate_outputs=[]
-    )
-    
-    try:
-        result = suggest_images(project, log)
-        log.status = "completed"
-        log.end_time = utc_now()
-        log.final_output = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
-        
-        # 更新项目
-        project.image_suggestions = result.image_suggestions
-        
-        return {
-            "project": project,
-            "result": result,
-            "agent_logs": state["agent_logs"] + [log],
-            "current_log": log,
-            "error": None
-        }
-    except Exception as e:
-        log.status = "failed"
-        log.end_time = utc_now()
-        log.error_message = str(e)
-        
-        return {
-            "project": project,
-            "result": None,
-            "agent_logs": state["agent_logs"] + [log],
-            "current_log": log,
-            "error": str(e)
-        }
-
-
-def assemble_html_node(state: AgentState) -> Dict[str, Any]:
-    """组装HTML节点"""
-    project = state["project"]
-    
-    # 创建执行日志
-    log = AgentExecutionLog(
-        agent_role="assembler",
-        agent_instance_id="assembler-1",
-        task_name="assemble_html",
-        status="running",
-        start_time=utc_now(),
-        thought_chain=[],
-        intermediate_outputs=[]
-    )
-    
-    try:
-        result = assemble_html(project, log)
-        log.status = "completed"
-        log.end_time = utc_now()
-        log.final_output = result.model_dump() if hasattr(result, 'model_dump') else dict(result)
-        
-        # 更新项目
-        # 注意：实际的HTML保存逻辑在orchestrator中处理
-        
-        return {
-            "project": project,
-            "result": result,
+            "project": result["project"],
+            "result": result["result"],
             "agent_logs": state["agent_logs"] + [log],
             "current_log": log,
             "error": None
@@ -295,45 +93,20 @@ def assemble_html_node(state: AgentState) -> Dict[str, Any]:
 
 def route_task(state: AgentState) -> str:
     """任务路由函数"""
-    task = state["task"]
-    
-    if task == "parse" or task == "parse_requirements":
-        return "parse_requirements"
-    elif task == "plan" or task == "plan_outline":
-        return "plan_outline"
-    elif task == "write" or task == "write_drafts":
-        return "write_drafts"
-    elif task == "review" or task == "review_project":
-        return "review_project"
-    elif task == "images" or task == "suggest_images":
-        return "suggest_images"
-    elif task == "assemble" or task == "assemble_html":
-        return "assemble_html"
-    else:
-        return END
+    return "skill_execution"
 
 
 # 创建工作流
 workflow = StateGraph(AgentState)
 
-# 添加节点
-workflow.add_node("parse_requirements", parse_requirements_node)
-workflow.add_node("plan_outline", plan_outline_node)
-workflow.add_node("write_drafts", write_drafts_node)
-workflow.add_node("review_project", review_project_node)
-workflow.add_node("suggest_images", suggest_images_node)
-workflow.add_node("assemble_html", assemble_html_node)
+# 添加技能执行节点
+workflow.add_node("skill_execution", skill_execution_node)
 
 # 设置入口点和路由
 workflow.set_conditional_entry_point(route_task)
 
-# 设置所有节点的出口
-workflow.add_edge("parse_requirements", END)
-workflow.add_edge("plan_outline", END)
-workflow.add_edge("write_drafts", END)
-workflow.add_edge("review_project", END)
-workflow.add_edge("suggest_images", END)
-workflow.add_edge("assemble_html", END)
+# 设置节点的出口
+workflow.add_edge("skill_execution", END)
 
 # 编译工作流
 compiled_workflow = workflow.compile()
@@ -347,5 +120,5 @@ async def run_agent_workflow(project: Project, task: str) -> Any:
         "agent_logs": []
     }
     
-    result = compiled_workflow.invoke(initial_state)
+    result = await compiled_workflow.ainvoke(initial_state)
     return result

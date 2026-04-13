@@ -23,6 +23,7 @@ from deepbs_common.agent_logic import (
     clear_agent_logs,
     get_agent_log,
 )
+from deepbs_common.skill_system import skill_manager
 from deepbs_common.schemas import (
     AgentExecutionLog,
     AgentRequest,
@@ -195,4 +196,41 @@ async def html(request: AgentRequest) -> HtmlAssembleResult:
 @app.get("/internal/agent-log/{task_name}", response_model=AgentExecutionLog | None)
 async def get_agent_execution_log(task_name: str):
     return get_agent_log(task_name)
+
+
+@app.get("/internal/skills")
+async def get_available_skills():
+    """获取所有可用技能"""
+    skills = skill_manager.get_available_skills()
+    return {
+        "skills": [
+            {
+                "name": skill.name,
+                "description": skill.description,
+                "category": skill.category,
+                "dependencies": skill.dependencies
+            }
+            for skill in skills
+        ]
+    }
+
+
+@app.post("/internal/skills/recommend")
+async def recommend_skills(request: AgentRequest):
+    """推荐适合的技能组合"""
+    recommendations = skill_manager.recommend_skills(request.project)
+    return {"recommendations": recommendations}
+
+
+@app.post("/internal/skills/execute/{skill_name}")
+async def execute_skill(skill_name: str, request: AgentRequest):
+    """执行指定技能"""
+    try:
+        result = await skill_manager.execute_skill(skill_name, request.project, {})
+        return {"result": result["result"]}
+    except Exception as e:
+        return JSONResponse(
+            status_code=400,
+            content={"error": str(e)}
+        )
 
