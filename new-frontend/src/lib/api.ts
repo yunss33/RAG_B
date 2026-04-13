@@ -1,5 +1,5 @@
 // API服务配置
-const API_BASE_URL = 'http://localhost:8100';
+const API_BASE_URL = 'http://localhost:8103';
 
 // 项目类型定义
 export interface Project {
