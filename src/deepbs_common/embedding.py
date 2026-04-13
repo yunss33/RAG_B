@@ -4,42 +4,32 @@ from typing import List, Optional
 import os
 import hashlib
 
-from langchain_community.embeddings import DashScopeEmbeddings
+import dashscope
 
 
 class EmbeddingManager:
-    """Embedding模型管理器，使用langchain和阿里百炼的嵌入模型"""
+    """Embedding模型管理器，使用阿里百炼的multimodal-embedding-v1模型"""
     
-    def __init__(self, model_name: str = "text-embedding-v1", api_key: Optional[str] = None):
+    def __init__(self, model_name: str = "multimodal-embedding-v1", api_key: Optional[str] = None):
         """
         初始化Embedding管理器
         
         Args:
-            model_name: 使用的模型名称，默认为text-embedding-v1
+            model_name: 使用的模型名称，默认为multimodal-embedding-v1
             api_key: 阿里百炼的API密钥，如果为None则从环境变量DASHSCOPE_API_KEY读取
         """
         self.model_name = model_name
         self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY", "sk-e0a3c05a49d444d79967e67cc5d1a2a9")
-        self.embeddings = None
-        self.vector_size = 1536  # text-embedding-v1的向量维度
+        dashscope.api_key = self.api_key
+        self.vector_size = 1024  # multimodal-embedding-v1的向量维度
+        self._initialized = False
     
     def initialize(self):
         """
         初始化Embedding模型
         """
-        if self.embeddings is None:
-            try:
-                self.embeddings = DashScopeEmbeddings(
-                    model=self.model_name,
-                    dashscope_api_key=self.api_key
-                )
-                # 获取实际向量维度
-                test_embedding = self.embeddings.embed_query("test")
-                self.vector_size = len(test_embedding)
-            except Exception as e:
-                print(f"Warning: Failed to initialize DashScopeEmbeddings: {e}")
-                print("Using local mock embedding instead")
-                self.embeddings = None
+        if not self._initialized:
+            self._initialized = True
         return self
     
     def get_embedding(self, text: str) -> List[float]:
@@ -54,13 +44,23 @@ class EmbeddingManager:
         """
         self.initialize()
         
-        if self.embeddings:
-            try:
-                embedding = self.embeddings.embed_query(text)
+        try:
+            resp = dashscope.MultiModalEmbedding.call(
+                model=self.model_name,
+                input=[
+                    {"text": text}
+                ]
+            )
+            if resp.status_code == 200:
+                embedding = resp.output['embeddings'][0]['embedding']
+                self.vector_size = len(embedding)
                 return embedding
-            except Exception as e:
-                print(f"Warning: Failed to get embedding from DashScope: {e}")
+            else:
+                print(f"Warning: Failed to get embedding from DashScope: {resp}")
                 print("Falling back to mock embedding")
+        except Exception as e:
+            print(f"Warning: Failed to get embedding from DashScope: {e}")
+            print("Falling back to mock embedding")
         
         # 本地模拟Embedding：使用哈希值生成固定长度的向量
         return self._mock_embedding(text)
@@ -77,13 +77,23 @@ class EmbeddingManager:
         """
         self.initialize()
         
-        if self.embeddings:
-            try:
-                embeddings = self.embeddings.embed_documents(texts)
+        try:
+            inputs = [{"text": text} for text in texts]
+            resp = dashscope.MultiModalEmbedding.call(
+                model=self.model_name,
+                input=inputs
+            )
+            if resp.status_code == 200:
+                embeddings = [item['embedding'] for item in resp.output['embeddings']]
+                if embeddings:
+                    self.vector_size = len(embeddings[0])
                 return embeddings
-            except Exception as e:
-                print(f"Warning: Failed to get embeddings from DashScope: {e}")
+            else:
+                print(f"Warning: Failed to get embeddings from DashScope: {resp}")
                 print("Falling back to mock embedding")
+        except Exception as e:
+            print(f"Warning: Failed to get embeddings from DashScope: {e}")
+            print("Falling back to mock embedding")
         
         # 本地模拟Embedding
         return [self._mock_embedding(text) for text in texts]
