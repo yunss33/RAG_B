@@ -73,8 +73,24 @@ class EvidenceItem(BaseModel):
     source_file_id: str
     source_name: str
     location_hint: str
+    chunk_id: str | None = None
+    start_pos: int | None = None
+    end_pos: int | None = None
+    page_number: int | None = None
     version: int = 1
     confidence: float = 0.7
+    vector: list[float] | None = None
+
+
+class DocumentChunk(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    source_file_id: str
+    source_name: str
+    content: str
+    start_pos: int
+    end_pos: int
+    vector: list[float] | None = None
+    created_at: str = Field(default_factory=utc_now)
 
 
 class OutlineSection(BaseModel):
@@ -86,11 +102,24 @@ class OutlineSection(BaseModel):
     status: str = "planned"
 
 
+class EvidenceBinding(BaseModel):
+    evidence_id: str
+    evidence_text: str
+    source_name: str
+    location_hint: str
+    confidence: float
+    start_pos: int | None = None
+    end_pos: int | None = None
+    page_number: int | None = None
+    citation_text: str | None = None
+
+
 class DraftSection(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid4()))
     outline_section_id: str
     title: str
     content: str
+    evidence_bindings: list[EvidenceBinding] = Field(default_factory=list)
     evidence_ids: list[str] = Field(default_factory=list)
     missing_inputs: list[str] = Field(default_factory=list)
 
@@ -171,6 +200,7 @@ class Project(BaseModel):
     requirements: list[RequirementItem] = Field(default_factory=list)
     outline: list[OutlineSection] = Field(default_factory=list)
     evidence_items: list[EvidenceItem] = Field(default_factory=list)
+    document_chunks: list[DocumentChunk] = Field(default_factory=list)
     drafts: list[DraftSection] = Field(default_factory=list)
     review_issues: list[ReviewIssue] = Field(default_factory=list)
     image_suggestions: list[ImageSuggestion] = Field(default_factory=list)

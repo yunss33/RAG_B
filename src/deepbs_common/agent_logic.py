@@ -8,6 +8,7 @@ from .schemas import (
     AgentExecutionLog,
     DraftResult,
     DraftSection,
+    EvidenceBinding,
     EvidenceItem,
     HtmlAssembleResult,
     ImageSuggestion,
@@ -214,11 +215,35 @@ def write_drafts(project: Project, log: AgentExecutionLog) -> DraftResult:
             "",
             f"本节围绕“{section.goal}”展开，响应标书的核心要求，并结合已导入资料给出可执行内容。",
         ]
+        
+        evidence_bindings = []
         if section_evidence:
             body.append("")
             body.append("关键支撑证据：")
             for item in section_evidence:
-                body.append(f"- {item.content}（来源：{item.source_name}）")
+                # 创建证据绑定
+                binding = EvidenceBinding(
+                    evidence_id=item.id,
+                    evidence_text=item.content,
+                    source_name=item.source_name,
+                    location_hint=item.location_hint,
+                    confidence=item.confidence,
+                    start_pos=item.start_pos,
+                    end_pos=item.end_pos,
+                    page_number=item.page_number,
+                    citation_text=f"{item.source_name} - {item.location_hint}"
+                )
+                evidence_bindings.append(binding)
+                
+                # 构建证据引用文本
+                location_info = []
+                if item.page_number:
+                    location_info.append(f"第{item.page_number}页")
+                if item.start_pos is not None and item.end_pos is not None:
+                    location_info.append(f"位置 {item.start_pos}-{item.end_pos}")
+                location_str = "，" + "，".join(location_info) if location_info else ""
+                
+                body.append(f"- {item.content}（来源：{item.source_name}{location_str}，可信度：{item.confidence:.2f}）")
         else:
             body.append("")
             body.append("当前缺少直接证据，需补充企业资料或历史案例。")
@@ -229,6 +254,7 @@ def write_drafts(project: Project, log: AgentExecutionLog) -> DraftResult:
             outline_section_id=section.id,
             title=section.title,
             content="\n".join(body),
+            evidence_bindings=evidence_bindings,
             evidence_ids=[item.id for item in section_evidence],
             missing_inputs=[] if section_evidence else ["缺少直接证据"],
         )
@@ -397,6 +423,24 @@ def assemble_html(project: Project, log: AgentExecutionLog) -> HtmlAssembleResul
         for paragraph in draft.content.split("\n\n"):
             if paragraph.strip():
                 parts.append(f"<p>{paragraph.replace(chr(10), '<br/>')}</p>")
+        
+        # 添加证据绑定信息
+        if draft.evidence_bindings:
+            parts.append("<div style='margin-top:24px;padding:16px;background-color:#f8f9fa;border-radius:8px;'>")
+            parts.append("<h4 style='margin-top:0;'>证据来源明细：</h4>")
+            parts.append("<ul style='margin-bottom:0;'>")
+            for binding in draft.evidence_bindings:
+                location_info = []
+                if binding.page_number:
+                    location_info.append(f"第{binding.page_number}页")
+                if binding.start_pos is not None and binding.end_pos is not None:
+                    location_info.append(f"位置 {binding.start_pos}-{binding.end_pos}")
+                location_str = "，" + "，".join(location_info) if location_info else ""
+                parts.append(f"<li><strong>来源：</strong>{binding.source_name}{location_str}，<strong>可信度：</strong>{binding.confidence:.2f}</li>")
+                parts.append(f"<li style='margin-left:20px;'><strong>内容：</strong>{binding.evidence_text}</li>")
+            parts.append("</ul>")
+            parts.append("</div>")
+        
         for suggestion_id in selected_map:
             suggestion = image_by_suggestion.get(suggestion_id)
             if suggestion and suggestion.suggested_section_title == draft.title:

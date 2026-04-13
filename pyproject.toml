@@ -9,7 +9,9 @@ dependencies = [
   "httpx>=0.28.0",
   "python-multipart>=0.0.20",
   "pydantic>=2.10.0",
-  "pydantic-settings>=2.8.0"
+  "pydantic-settings>=2.8.0",
+  "qdrant-client>=1.11.0",
+  "sentence-transformers>=3.0.0"
 ]
 
 [project.optional-dependencies]
