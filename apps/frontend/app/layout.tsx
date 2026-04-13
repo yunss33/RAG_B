@@ -21,6 +21,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             <div className="actions">
               <Link className="button" href="/">项目列表</Link>
               <Link className="button secondary" href="/projects/new">创建项目</Link>
+              <Link className="button secondary" href="/skills">技能系统</Link>
             </div>
           </div>
           {children}

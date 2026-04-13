@@ -50,4 +50,34 @@ export async function getFinalHtml(id: string) {
   return parseJson<any>(response);
 }
 
+// 技能相关API
+export async function getSkills() {
+  const response = await fetch(`${API_BASE}/internal/skills`, { cache: "no-store" });
+  return parseJson<any[]>(response);
+}
+
+export async function getSkillRecommendations(projectId: string) {
+  const response = await fetch(`${API_BASE}/internal/skills/recommend`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ project: { id: projectId } }),
+    cache: "no-store"
+  });
+  return parseJson<any[]>(response);
+}
+
+export async function executeSkill(skillName: string, projectId: string, context?: any) {
+  const response = await fetch(`${API_BASE}/internal/skills/execute/${skillName}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ project: { id: projectId }, context }),
+    cache: "no-store"
+  });
+  return parseJson<any>(response);
+}
+
 export { API_BASE };
