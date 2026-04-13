@@ -110,6 +110,25 @@ class SkillManager:
         if not skill:
             raise ValueError(f"Skill {skill_name} not found")
         
+        # 检查技能依赖
+        metadata = skill.metadata
+        if metadata.dependencies:
+            for dep_skill_name in metadata.dependencies:
+                # 检查依赖技能是否存在
+                dep_skill = self.skill_pool.get_skill(dep_skill_name)
+                if not dep_skill:
+                    raise ValueError(f"Dependency skill {dep_skill_name} not found")
+                
+                # 检查依赖技能是否已执行（基于项目状态）
+                if dep_skill_name == "parse_requirements" and not project.requirements:
+                    raise ValueError(f"Dependency skill {dep_skill_name} has not been executed yet")
+                elif dep_skill_name == "plan_outline" and not project.outline:
+                    raise ValueError(f"Dependency skill {dep_skill_name} has not been executed yet")
+                elif dep_skill_name == "write_drafts" and not project.drafts:
+                    raise ValueError(f"Dependency skill {dep_skill_name} has not been executed yet")
+                elif dep_skill_name == "review_project" and not project.review_issues:
+                    raise ValueError(f"Dependency skill {dep_skill_name} has not been executed yet")
+        
         return await skill.execute(project, context)
     
     def get_available_skills(self) -> List[SkillMetadata]:
