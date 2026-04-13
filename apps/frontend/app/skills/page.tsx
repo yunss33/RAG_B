@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { getSkills, getSkillRecommendations, executeSkill } from '@/lib/api';
 
