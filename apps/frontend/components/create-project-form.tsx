@@ -8,11 +8,8 @@ export function CreateProjectForm() {
   const router = useRouter();
   const [error, setError] = useState("");
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  async function handleSubmit(formData: FormData) {
     setError("");
-    const form = e.currentTarget as HTMLFormElement;
-    const formData = new FormData(form);
     const payload = {
       name: String(formData.get("name") || ""),
       description: String(formData.get("description") || ""),
@@ -26,7 +23,6 @@ export function CreateProjectForm() {
         body: JSON.stringify(payload)
       });
       console.log('Response status:', response.status);
-      console.log('Response headers:', response.headers);
       if (!response.ok) {
         const errorText = await response.text();
         console.log('Error response:', errorText);
@@ -45,7 +41,7 @@ export function CreateProjectForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="panel">
+    <form action={handleSubmit} className="panel">
       <h2>创建项目</h2>
       <label>
         项目名称

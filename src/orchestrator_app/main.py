@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+<<<<<<< HEAD
 import asyncio
 import httpx
 from uuid import uuid4
@@ -14,6 +15,13 @@ from deepbs_common.schemas import (
     RunResponse,
     utc_now,
 )
+=======
+import httpx
+from fastapi import FastAPI, HTTPException
+
+from deepbs_common.repository import repository
+from deepbs_common.schemas import AgentRequest, ProjectStage, RunResponse
+>>>>>>> origin/main
 from deepbs_common.settings import settings
 from deepbs_common.storage import storage
 
@@ -30,6 +38,7 @@ async def _agent_post(path: str, project):
         return response.json()
 
 
+<<<<<<< HEAD
 def _create_agent_log(agent_role: str, task_name: str, instance_id: str | None = None) -> AgentExecutionLog:
     instance_id = instance_id or str(uuid4())
     return AgentExecutionLog(
@@ -85,6 +94,8 @@ def _add_agent_message(
     repository.save_project(project)
 
 
+=======
+>>>>>>> origin/main
 @app.get("/healthz")
 async def healthz() -> dict[str, str]:
     return {"status": "ok"}
@@ -103,6 +114,7 @@ async def run_project(project_id: str) -> RunResponse:
     project.run_state.task_tree = [{"task": "parse_requirements", "status": "running"}]
     repository.save_project(project)
 
+<<<<<<< HEAD
     parser_log = _create_agent_log("parser", "parse_requirements", "parser-1")
     project.run_state.agent_logs.append(parser_log)
     project.run_state.active_agents["parser-1"] = {"role": "parser", "status": "running"}
@@ -149,11 +161,23 @@ async def run_project(project_id: str) -> RunResponse:
         project.run_state.agent_logs.append(writer_log)
         project.run_state.active_agents[f"writer-{idx+1}"] = {"role": "writer", "section": section.title, "status": "running"}
         writer_logs.append(writer_log)
+=======
+    requirements_payload = await _agent_post("/internal/parse-tender", project)
+    project.requirements = requirements_payload["requirements"]
+    repository.save_project(project)
+
+    outline_payload = await _agent_post("/internal/plan-outline", repository.get_project(project_id))
+    project = repository.get_project(project_id)
+    project.outline = outline_payload["outline"]
+    project.run_state.stage = ProjectStage.drafting
+    project.run_state.task_tree.append({"task": "plan_outline", "status": "completed"})
+>>>>>>> origin/main
     repository.save_project(project)
 
     drafts_payload = await _agent_post("/internal/write-drafts", repository.get_project(project_id))
     project = repository.get_project(project_id)
     project.drafts = drafts_payload["drafts"]
+<<<<<<< HEAD
 
     for idx, writer_log in enumerate(writer_logs):
         _update_agent_log_status(
@@ -172,12 +196,15 @@ async def run_project(project_id: str) -> RunResponse:
         project.run_state.agent_logs.append(reviewer_log)
         project.run_state.active_agents[f"reviewer-{idx+1}"] = {"role": "reviewer", "perspective": "合规性" if idx == 0 else "一致性", "status": "running"}
         reviewer_logs.append(reviewer_log)
+=======
+>>>>>>> origin/main
     repository.save_project(project)
 
     review_payload = await _agent_post("/internal/review", repository.get_project(project_id))
     project = repository.get_project(project_id)
     project.review_issues = review_payload["review_issues"]
     project.run_state.stage = ProjectStage.reviewing
+<<<<<<< HEAD
 
     for idx, reviewer_log in enumerate(reviewer_logs):
         _update_agent_log_status(
@@ -188,6 +215,8 @@ async def run_project(project_id: str) -> RunResponse:
             final_output={"issues_found": len(project.review_issues)},
         )
         project.run_state.active_agents[f"reviewer-{idx+1}"]["status"] = "completed"
+=======
+>>>>>>> origin/main
     repository.save_project(project)
 
     images_payload = await _agent_post("/internal/suggest-images", repository.get_project(project_id))
@@ -219,12 +248,15 @@ async def resume_project(project_id: str) -> RunResponse:
     except FileNotFoundError as exc:
         raise HTTPException(status_code=404, detail="project not found") from exc
 
+<<<<<<< HEAD
     assembler_log = _create_agent_log("assembler", "assemble_html", "assembler-1")
     project.run_state.agent_logs.append(assembler_log)
     project.run_state.active_agents["assembler-1"] = {"role": "assembler", "status": "running"}
     repository.save_project(project)
     _update_agent_log_status(project, assembler_log.id, "running")
 
+=======
+>>>>>>> origin/main
     project.run_state.stage = ProjectStage.assembling
     project.run_state.waiting_for_user = False
     project.run_state.blocked_reason = None
@@ -236,6 +268,7 @@ async def resume_project(project_id: str) -> RunResponse:
     project.final_html_object_key = final_key
     project.run_state.stage = ProjectStage.completed
     project.run_state.task_tree.append({"task": "assemble_html", "status": "completed"})
+<<<<<<< HEAD
     
     _update_agent_log_status(
         project,
@@ -245,6 +278,8 @@ async def resume_project(project_id: str) -> RunResponse:
         final_output={"file_key": final_key},
     )
     project.run_state.active_agents["assembler-1"]["status"] = "completed"
+=======
+>>>>>>> origin/main
     repository.save_project(project)
 
     return RunResponse(

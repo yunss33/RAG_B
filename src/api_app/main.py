@@ -35,7 +35,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
 def _project_status(project: Project) -> ProjectStatusResponse:
     return ProjectStatusResponse(
         project_id=project.id,

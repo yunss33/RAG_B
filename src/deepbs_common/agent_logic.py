@@ -68,6 +68,7 @@ def record_agent_execution(task_name: str) -> Callable:
     return decorator
 
 
+
 def _group_evidence(project: Project) -> dict[str, list[EvidenceItem]]:
     grouped: dict[str, list[EvidenceItem]] = defaultdict(list)
     for item in project.evidence_items:
@@ -207,6 +208,7 @@ def write_drafts(project: Project, log: AgentExecutionLog) -> DraftResult:
         log.thought_chain.append(f"正在撰写第 {index+1} 章节: {section.title}")
         section_evidence = evidence.get(section.title, [])[:2] or evidence.get("all", [])[:2]
         
+
         body = [
             f"### {section.title}",
             "",
@@ -364,6 +366,7 @@ def assemble_html(project: Project, log: AgentExecutionLog) -> HtmlAssembleResul
         "draft_count": len(project.drafts),
         "review_issue_count": len(project.review_issues),
     })
+
 
     parts = [
         "<!DOCTYPE html>",

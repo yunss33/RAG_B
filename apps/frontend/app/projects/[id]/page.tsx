@@ -297,13 +297,13 @@ export default function ProjectDetailPage({ params }: { params: { id: string } }
             </div>
             <div className="panel">
               <h2>工作导航</h2>
-              <div className="stack" style={{ gap: '8px' }}>
-                <Link className="button" href={`/projects/${projectId}/upload`} style={{ textAlign: 'center', transition: 'all 0.2s ease' }}>资料上传</Link>
-                <Link className="button secondary" href={`/projects/${projectId}/requirements`} style={{ textAlign: 'center', transition: 'all 0.2s ease' }}>解析结果</Link>
-                <Link className="button secondary" href={`/projects/${projectId}/outline`} style={{ textAlign: 'center', transition: 'all 0.2s ease' }}>章节计划</Link>
-                <Link className="button secondary" href={`/projects/${projectId}/drafts`} style={{ textAlign: 'center', transition: 'all 0.2s ease' }}>草稿与审查</Link>
-                <Link className="button secondary" href={`/projects/${projectId}/images`} style={{ textAlign: 'center', transition: 'all 0.2s ease' }}>图片选择</Link>
-                <Link className="button secondary" href={`/projects/${projectId}/final`} style={{ textAlign: 'center', transition: 'all 0.2s ease' }}>终稿预览</Link>
+              <div className="actions">
+                <Link className="button" href={`/projects/${projectId}/upload`}>资料上传</Link>
+                <Link className="button secondary" href={`/projects/${projectId}/requirements`}>解析结果</Link>
+                <Link className="button secondary" href={`/projects/${projectId}/outline`}>章节计划</Link>
+                <Link className="button secondary" href={`/projects/${projectId}/drafts`}>草稿与审查</Link>
+                <Link className="button secondary" href={`/projects/${projectId}/images`}>图片选择</Link>
+                <Link className="button secondary" href={`/projects/${projectId}/final`}>终稿预览</Link>
               </div>
             </div>
           </div>
