@@ -6,6 +6,8 @@ import hashlib
 
 import dashscope
 
+from .settings import settings
+
 
 class EmbeddingManager:
     """Embedding模型管理器，使用阿里百炼的multimodal-embedding-v1模型"""
@@ -16,11 +18,12 @@ class EmbeddingManager:
         
         Args:
             model_name: 使用的模型名称，默认为multimodal-embedding-v1
-            api_key: 阿里百炼的API密钥，如果为None则从环境变量DASHSCOPE_API_KEY读取
+            api_key: 阿里百炼的API密钥，如果为None则从settings读取
         """
         self.model_name = model_name
-        self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY", "sk-e0a3c05a49d444d79967e67cc5d1a2a9")
-        dashscope.api_key = self.api_key
+        self.api_key = api_key or settings.dashscope_api_key or os.getenv("DASHSCOPE_API_KEY")
+        if self.api_key:
+            dashscope.api_key = self.api_key
         self.vector_size = 1024  # multimodal-embedding-v1的向量维度
         self._initialized = False
     
