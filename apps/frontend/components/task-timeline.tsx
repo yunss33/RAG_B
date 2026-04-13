@@ -106,7 +106,25 @@ export function TaskTimeline({
                 className="button secondary"
                 onClick={() => onTaskJump(tasks[0]?.id)}
                 disabled={tasks.length === 0}
-                style={{ padding: '6px 10px', fontSize: '14px' }}
+                style={{ 
+                  padding: '6px 10px', 
+                  fontSize: '14px',
+                  transition: 'all 0.2s ease',
+                  borderRadius: '12px',
+                  border: '1px solid var(--line)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = 'var(--accent-light)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'none';
+                  }
+                }}
               >
                 ⏮ 开始
               </button>
@@ -119,7 +137,25 @@ export function TaskTimeline({
                   }
                 }}
                 disabled={!selectedTaskId || tasks.findIndex(t => t.id === selectedTaskId) <= 0}
-                style={{ padding: '6px 10px', fontSize: '14px' }}
+                style={{ 
+                  padding: '6px 10px', 
+                  fontSize: '14px',
+                  transition: 'all 0.2s ease',
+                  borderRadius: '12px',
+                  border: '1px solid var(--line)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = 'var(--accent-light)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'none';
+                  }
+                }}
               >
                 ⏪ 上一个
               </button>
@@ -132,7 +168,25 @@ export function TaskTimeline({
                   }
                 }}
                 disabled={!selectedTaskId || tasks.findIndex(t => t.id === selectedTaskId) >= tasks.length - 1}
-                style={{ padding: '6px 10px', fontSize: '14px' }}
+                style={{ 
+                  padding: '6px 10px', 
+                  fontSize: '14px',
+                  transition: 'all 0.2s ease',
+                  borderRadius: '12px',
+                  border: '1px solid var(--line)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = 'var(--accent-light)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'none';
+                  }
+                }}
               >
                 ⏩ 下一个
               </button>
@@ -140,7 +194,25 @@ export function TaskTimeline({
                 className="button secondary"
                 onClick={() => onTaskJump(tasks[tasks.length - 1]?.id)}
                 disabled={tasks.length === 0}
-                style={{ padding: '6px 10px', fontSize: '14px' }}
+                style={{ 
+                  padding: '6px 10px', 
+                  fontSize: '14px',
+                  transition: 'all 0.2s ease',
+                  borderRadius: '12px',
+                  border: '1px solid var(--line)'
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = 'var(--accent-light)';
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.transform = 'none';
+                  }
+                }}
               >
                 结束 ⏭
               </button>
@@ -150,7 +222,23 @@ export function TaskTimeline({
             <button
               className="button secondary"
               onClick={onPlayPause}
-              style={{ padding: '8px 16px', fontSize: '14px', minWidth: '80px' }}
+              style={{ 
+                padding: '8px 16px', 
+                fontSize: '14px', 
+                minWidth: '80px',
+                transition: 'all 0.2s ease',
+                borderRadius: '12px',
+                border: '1px solid var(--line)',
+                backgroundColor: isPlaying ? 'var(--accent-light)' : 'transparent'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-2px)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'none';
+                e.currentTarget.style.boxShadow = 'none';
+              }}
             >
               {isPlaying ? '⏸ 暂停' : '▶ 播放'}
             </button>
@@ -165,7 +253,17 @@ export function TaskTimeline({
                 margin: 0,
                 borderRadius: '12px',
                 border: '1px solid var(--line)',
-                background: 'white'
+                background: 'white',
+                transition: 'all 0.2s ease',
+                cursor: 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = 'var(--accent)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.1)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'var(--line)';
+                e.currentTarget.style.boxShadow = 'none';
               }}
             >
               <option value={0.25}>0.25x</option>
@@ -214,8 +312,10 @@ export function TaskTimeline({
                     height: '16px',
                     borderRadius: '9999px',
                     border: '2px solid white',
-                    boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
-                    ...STATUS_DOT_STYLES[task.status as keyof typeof STATUS_DOT_STYLES]
+                    boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.1), 0 0 0 2px rgba(255, 255, 255, 0.8)',
+                    ...STATUS_DOT_STYLES[task.status as keyof typeof STATUS_DOT_STYLES],
+                    transition: 'all 0.3s ease',
+                    transform: isSelected ? 'scale(1.2)' : 'scale(1)'
                   }}
                 />
                 <div
@@ -226,8 +326,16 @@ export function TaskTimeline({
                     border: `2px solid`,
                     ...STATUS_STYLES[task.status as keyof typeof STATUS_STYLES],
                     cursor: 'pointer',
-                    boxShadow: isSelected ? '0 0 0 2px #f97316' : 'none',
-                    transform: isSelected ? 'translateX(4px)' : 'none'
+                    boxShadow: isSelected ? '0 0 0 2px #f97316, 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' : 'none',
+                    transform: isSelected ? 'translateX(8px)' : 'none',
+                    transition: 'all 0.3s ease',
+                    borderRadius: '16px'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = isSelected ? 'translateX(8px) scale(1.02)' : 'translateX(4px) scale(1.02)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = isSelected ? 'translateX(8px)' : 'none';
                   }}
                 >
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -256,7 +364,8 @@ export function TaskTimeline({
                     marginTop: '8px', 
                     marginLeft: '16px', 
                     paddingLeft: '32px', 
-                    borderLeft: '2px solid #e5e7eb'
+                    borderLeft: '2px solid #e5e7eb',
+                    animation: 'fadeIn 0.3s ease-in-out'
                   }}>
                     <div className="card" style={{ margin: 0, backgroundColor: 'var(--panel-alt)' }}>
                       <h4 style={{ fontWeight: 600, marginBottom: '12px' }}>执行详情</h4>
@@ -270,11 +379,29 @@ export function TaskTimeline({
                             {taskLog.thought_chain.map((thought: string, i: number) => (
                               <div key={i} style={{ 
                                 backgroundColor: 'white', 
-                                padding: '8px', 
-                                borderRadius: 'var(--border-radius)', 
-                                border: '1px solid var(--line)'
+                                padding: '12px', 
+                                borderRadius: '12px', 
+                                border: '1px solid var(--line)',
+                                transition: 'all 0.3s ease',
+                                animation: `fadeIn 0.3s ease-in-out ${i * 0.1}s both`
                               }}>
-                                {thought}
+                                <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px' }}>
+                                  <div style={{ 
+                                    width: '24px', 
+                                    height: '24px', 
+                                    borderRadius: '50%', 
+                                    backgroundColor: 'var(--accent-light)', 
+                                    display: 'flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
+                                    fontSize: '12px',
+                                    fontWeight: 600,
+                                    color: 'var(--accent)'
+                                  }}>
+                                    {i + 1}
+                                  </div>
+                                  <div style={{ flex: 1 }}>{thought}</div>
+                                </div>
                               </div>
                             ))}
                           </div>
@@ -290,11 +417,23 @@ export function TaskTimeline({
                             {taskLog.intermediate_outputs.map((output: any, i: number) => (
                               <div key={i} style={{ 
                                 backgroundColor: 'white', 
-                                padding: '8px', 
-                                borderRadius: 'var(--border-radius)', 
-                                border: '1px solid var(--line)'
+                                padding: '12px', 
+                                borderRadius: '12px', 
+                                border: '1px solid var(--line)',
+                                transition: 'all 0.3s ease',
+                                animation: `fadeIn 0.3s ease-in-out ${0.5 + i * 0.1}s both`
                               }}>
-                                <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+                                <div style={{ marginBottom: '8px', fontWeight: 600, fontSize: '13px', color: 'var(--muted)' }}>
+                                  输出 {i + 1}
+                                </div>
+                                <pre style={{ 
+                                  whiteSpace: 'pre-wrap', 
+                                  wordBreak: 'break-word', 
+                                  margin: 0, 
+                                  fontSize: '13px',
+                                  lineHeight: '1.4',
+                                  color: 'var(--ink)'
+                                }}>
                                   {JSON.stringify(output, null, 2)}
                                 </pre>
                               </div>
@@ -302,7 +441,7 @@ export function TaskTimeline({
                           </div>
                         </div>
                       )}
-                      
+                       
                       {taskLog.final_output && (
                         <div style={{ marginBottom: '16px' }}>
                           <h5 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink)', marginBottom: '8px' }}>
@@ -310,12 +449,20 @@ export function TaskTimeline({
                           </h5>
                           <div style={{ 
                             backgroundColor: 'white', 
-                            padding: '8px', 
-                            borderRadius: 'var(--border-radius)', 
-                            border: '1px solid var(--line)',
-                            fontSize: '14px'
+                            padding: '12px', 
+                            borderRadius: '12px', 
+                            border: '1px solid var(--accent-light)',
+                            fontSize: '14px',
+                            animation: 'fadeIn 0.3s ease-in-out 0.8s both'
                           }}>
-                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
+                            <pre style={{ 
+                              whiteSpace: 'pre-wrap', 
+                              wordBreak: 'break-word', 
+                              margin: 0, 
+                              fontSize: '13px',
+                              lineHeight: '1.4',
+                              color: 'var(--ink)'
+                            }}>
                               {JSON.stringify(taskLog.final_output, null, 2)}
                             </pre>
                           </div>

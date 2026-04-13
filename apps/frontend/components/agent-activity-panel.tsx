@@ -12,6 +12,9 @@ interface Agent {
   perspective?: string;
   thoughts?: string[];
   timestamp?: number;
+  usageCount?: number;
+  successRate?: number;
+  averageExecutionTime?: number;
 }
 
 interface AgentActivityPanelProps {
@@ -29,9 +32,9 @@ const AGENT_INFO = {
 };
 
 const STATUS_COLORS: Record<string, React.CSSProperties> = {
-  idle: { backgroundColor: '#e5e7eb' },
-  running: { backgroundColor: '#facc15', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' },
-  completed: { backgroundColor: '#22c55e' },
+  idle: { backgroundColor: '#e2e8f0' },
+  running: { backgroundColor: '#f59e0b', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' },
+  completed: { backgroundColor: '#10b981' },
   failed: { backgroundColor: '#ef4444' },
 };
 
@@ -74,7 +77,9 @@ export function AgentActivityPanel({ agents, onAgentClick, selectedAgentId }: Ag
                 border: isSelected ? '2px solid #f97316' : '1px solid var(--line)', 
                 borderRadius: '18px',
                 cursor: 'pointer',
-                transition: 'var(--transition)'
+                transition: 'all 0.3s ease',
+                transform: isSelected ? 'translateX(8px)' : 'none',
+                boxShadow: isSelected ? '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)' : 'none'
               }}
             >
               <div 
@@ -82,23 +87,91 @@ export function AgentActivityPanel({ agents, onAgentClick, selectedAgentId }: Ag
                   display: 'flex', 
                   alignItems: 'center', 
                   justifyContent: 'space-between', 
-                  padding: '16px'
+                  padding: '16px',
+                  transition: 'all 0.2s ease',
+                  borderRadius: '16px'
                 }}
                 onClick={() => {
                   toggleExpand(agent.id);
                   onAgentClick?.(agent);
                 }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.02)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                }}
               >
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                  <span style={{ fontSize: '24px' }}>{info.icon}</span>
+                  <span style={{ 
+                    fontSize: '24px',
+                    transition: 'transform 0.3s ease',
+                    filter: isSelected ? 'brightness(1.2)' : 'brightness(1)'
+                  }}>{info.icon}</span>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 600, fontSize: '16px' }}>{info.name}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
-                      {agent.section && <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{agent.section}</span>}
-                      {agent.perspective && <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{agent.perspective}视角</span>}
+                    <div style={{ 
+                      fontWeight: 600, 
+                      fontSize: '16px',
+                      transition: 'color 0.3s ease',
+                      color: isSelected ? 'var(--accent)' : 'var(--ink)'
+                    }}>{info.name}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px', flexWrap: 'wrap' }}>
+                      {agent.section && <span style={{ 
+                        fontSize: '12px', 
+                        color: 'var(--muted)',
+                        backgroundColor: 'var(--panel-alt)',
+                        padding: '2px 8px',
+                        borderRadius: '12px'
+                      }}>{agent.section}</span>}
+                      {agent.perspective && <span style={{ 
+                        fontSize: '12px', 
+                        color: 'var(--muted)',
+                        backgroundColor: 'var(--panel-alt)',
+                        padding: '2px 8px',
+                        borderRadius: '12px'
+                      }}>{agent.perspective}视角</span>}
                       {agent.timestamp && (
-                        <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
+                        <span style={{ 
+                          fontSize: '12px', 
+                          color: 'var(--muted)',
+                          backgroundColor: 'var(--panel-alt)',
+                          padding: '2px 8px',
+                          borderRadius: '12px'
+                        }}>
                           {new Date(agent.timestamp).toLocaleTimeString()}
+                        </span>
+                      )}
+                      {agent.usageCount !== undefined && (
+                        <span style={{ 
+                          fontSize: '12px', 
+                          color: 'var(--muted)',
+                          backgroundColor: 'var(--panel-alt)',
+                          padding: '2px 8px',
+                          borderRadius: '12px'
+                        }}>
+                          使用 {agent.usageCount} 次
+                        </span>
+                      )}
+                      {agent.successRate !== undefined && (
+                        <span style={{ 
+                          fontSize: '12px', 
+                          color: agent.successRate > 80 ? '#10b981' : agent.successRate > 50 ? '#f59e0b' : '#ef4444',
+                          backgroundColor: 'var(--panel-alt)',
+                          padding: '2px 8px',
+                          borderRadius: '12px'
+                        }}>
+                          成功率 {agent.successRate}%
+                        </span>
+                      )}
+                      {agent.averageExecutionTime !== undefined && (
+                        <span style={{ 
+                          fontSize: '12px', 
+                          color: 'var(--muted)',
+                          backgroundColor: 'var(--panel-alt)',
+                          padding: '2px 8px',
+                          borderRadius: '12px'
+                        }}>
+                          平均执行 {agent.averageExecutionTime}s
                         </span>
                       )}
                     </div>
@@ -111,6 +184,7 @@ export function AgentActivityPanel({ agents, onAgentClick, selectedAgentId }: Ag
                         width: '12px',
                         height: '12px',
                         borderRadius: '9999px',
+                        boxShadow: '0 0 0 2px white',
                         ...STATUS_COLORS[agent.status as keyof typeof STATUS_COLORS]
                       }}
                     />
@@ -128,7 +202,8 @@ export function AgentActivityPanel({ agents, onAgentClick, selectedAgentId }: Ag
               {isExpanded && agent.thoughts && agent.thoughts.length > 0 && (
                 <div style={{ 
                   padding: '0 16px 16px', 
-                  borderTop: '1px solid var(--line)'
+                  borderTop: '1px solid var(--line)',
+                  animation: 'fadeIn 0.3s ease-in-out'
                 }}>
                   <div style={{ marginTop: '12px' }}>
                     <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>思考过程</div>

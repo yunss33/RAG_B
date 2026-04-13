@@ -426,7 +426,7 @@ label {
   box-shadow: var(--shadow-lg);
   border-color: var(--accent-light);
 }
-
+/* 全局动画 */
 @keyframes pulse {
   0%, 100% {
     opacity: 1;
@@ -439,7 +439,7 @@ label {
 @keyframes fadeIn {
   from {
     opacity: 0;
-    transform: translateY(10px);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
@@ -450,11 +450,49 @@ label {
 @keyframes slideIn {
   from {
     opacity: 0;
-    transform: translateX(-10px);
+    transform: translateX(-20px);
   }
   to {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .three-column-layout {
+    grid-template-columns: 280px 1fr 280px !important;
+    gap: 16px !important;
+    padding: 16px !important;
+  }
+}
+
+@media (max-width: 992px) {
+  .three-column-layout {
+    grid-template-columns: 1fr !important;
+    grid-template-rows: auto auto auto !important;
+  }
+  
+  .left-panel,
+  .center-panel,
+  .right-panel {
+    order: initial;
+  }
+}
+
+@media (max-width: 768px) {
+  .three-column-layout {
+    padding: 12px !important;
+    gap: 12px !important;
   }
 }
 
