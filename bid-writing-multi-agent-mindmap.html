@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>标书写作多智能体架构思维导图</title>
+  <style>
+    :root {
+      --bg: #f4efe6;
+      --panel: #fffaf2;
+      --panel-strong: #fff4df;
+      --ink: #2a241d;
+      --muted: #6f6251;
+      --line: #d8c8ad;
+      --accent: #b5522d;
+      --accent-soft: #f0d5bd;
+      --green: #3f6b47;
+      --blue: #2d5b7d;
+      --gold: #9c6b1d;
+      --shadow: 0 18px 45px rgba(74, 48, 25, 0.12);
+      --radius: 22px;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(181, 82, 45, 0.12), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(45, 91, 125, 0.1), transparent 26%),
+        linear-gradient(180deg, #f8f4ec 0%, var(--bg) 100%);
+    }
+
+    .page {
+      max-width: 1500px;
+      margin: 0 auto;
+      padding: 36px 24px 60px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(255, 250, 242, 0.96), rgba(250, 238, 216, 0.94));
+      border: 1px solid rgba(181, 82, 45, 0.14);
+      border-radius: 30px;
+      box-shadow: var(--shadow);
+      padding: 28px 30px;
+      margin-bottom: 26px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: rgba(181, 82, 45, 0.1);
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    h1 {
+      margin: 14px 0 8px;
+      font-size: clamp(28px, 4vw, 48px);
+      line-height: 1.08;
+    }
+
+    .summary {
+      margin: 0;
+      max-width: 980px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .legend span {
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+    }
+
+    .mindmap {
+      display: grid;
+      grid-template-columns: 1.15fr 0.9fr 1.15fr;
+      gap: 20px;
+      align-items: start;
+      position: relative;
+    }
+
+    .column {
+      display: grid;
+      gap: 18px;
+    }
+
+    .center {
+      position: sticky;
+      top: 18px;
+      background: linear-gradient(145deg, #fff1db, #fffaf1);
+      border: 1px solid rgba(181, 82, 45, 0.18);
+      border-radius: 32px;
+      box-shadow: var(--shadow);
+      padding: 24px 22px;
+      overflow: hidden;
+    }
+
+    .center::after {
+      content: "";
+      position: absolute;
+      inset: auto -80px -80px auto;
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(181, 82, 45, 0.12), transparent 62%);
+      pointer-events: none;
+    }
+
+    .center h2 {
+      margin: 0 0 10px;
+      font-size: 26px;
+    }
+
+    .center p {
+      margin: 0 0 14px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .core-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .core-list div {
+      background: rgba(255, 255, 255, 0.72);
+      border: 1px solid rgba(216, 200, 173, 0.8);
+      border-radius: 16px;
+      padding: 12px 14px;
+      line-height: 1.6;
+    }
+
+    .cluster {
+      background: rgba(255, 250, 242, 0.9);
+      border: 1px solid rgba(216, 200, 173, 0.88);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .cluster-header {
+      padding: 16px 18px 12px;
+      border-bottom: 1px solid rgba(216, 200, 173, 0.72);
+      background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,250,242,0.2));
+    }
+
+    .cluster-header h3 {
+      margin: 0 0 6px;
+      font-size: 20px;
+    }
+
+    .cluster-header p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 14px;
+    }
+
+    .cards {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px 14px 12px;
+      position: relative;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 14px;
+      bottom: 14px;
+      width: 4px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .card.green::before {
+      background: var(--green);
+    }
+
+    .card.blue::before {
+      background: var(--blue);
+    }
+
+    .card.gold::before {
+      background: var(--gold);
+    }
+
+    .card h4 {
+      margin: 0 0 8px 10px;
+      font-size: 17px;
+    }
+
+    .meta {
+      margin: 0 0 8px 10px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .card ul {
+      margin: 0 0 0 26px;
+      padding: 0;
+      line-height: 1.65;
+      color: #463b30;
+      font-size: 14px;
+    }
+
+    .footer {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .note {
+      background: rgba(255, 250, 242, 0.9);
+      border: 1px solid rgba(216, 200, 173, 0.9);
+      border-radius: 20px;
+      box-shadow: var(--shadow);
+      padding: 18px 20px;
+    }
+
+    .note h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .note ul {
+      margin: 0;
+      padding-left: 18px;
+      line-height: 1.75;
+      color: var(--muted);
+    }
+
+    @media (max-width: 1200px) {
+      .mindmap {
+        grid-template-columns: 1fr;
+      }
+
+      .center {
+        position: relative;
+        top: auto;
+        order: -1;
+      }
+
+      .footer {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <span class="eyebrow">多智能体 + 深度思考 + RAG 标书系统</span>
+      <h1>标书写作项目核心智能体思维导图</h1>
+      <p class="summary">
+        目标不是做一个“单模型写文案”，而是做一个面向标书生产的协作系统：由调度层拆解任务，RAG 提供企业知识与历史样板，深度思考层负责理解招标文件与写作策略，执行层负责撰写、校验、补证、评分与成稿。下面这张图给的是第一版最重要的智能体分工。
+      </p>
+      <div class="legend">
+        <span>核心中枢：任务编排与状态管理</span>
+        <span>知识底座：RAG 检索、证据绑定、版本控制</span>
+        <span>执行层：理解、规划、写作、评审、整合</span>
+        <span>约束：当前版本不联网，全部知识来自本地 RAG</span>
+      </div>
+    </section>
+
+    <section class="mindmap">
+      <div class="column">
+        <article class="cluster">
+          <div class="cluster-header">
+            <h3>1. 指挥与拆解层</h3>
+            <p>决定“先做什么、谁来做、做到什么算完成”，是整个系统的调度中枢。</p>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <h4>总控编排智能体</h4>
+              <p class="meta">最核心，类似 Manus 的任务总导演</p>
+              <ul>
+                <li>接收用户任务、项目配置、标书目标</li>
+                <li>维护任务树、Agent 状态、交付里程碑</li>
+                <li>决定串行/并行执行与重试策略</li>
+              </ul>
+            </div>
+            <div class="card gold">
+              <h4>招标文件解析智能体</h4>
+              <p class="meta">把招标书拆成可执行要求</p>
+              <ul>
+                <li>抽取资格项、评分项、废标项、交付格式</li>
+                <li>识别技术、商务、价格、资质等章节要求</li>
+                <li>输出结构化 requirement schema</li>
+              </ul>
+            </div>
+            <div class="card blue">
+              <h4>写作策略规划智能体</h4>
+              <p class="meta">深度思考主力，负责写作路线</p>
+              <ul>
+                <li>决定章节顺序、证据使用优先级、差异化卖点</li>
+                <li>识别哪些内容必须引用 RAG 证据</li>
+                <li>给后续写作 Agent 下发章级写作 brief</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="cluster">
+          <div class="cluster-header">
+            <h3>2. 知识与证据层</h3>
+            <p>不联网时，这一层决定系统是不是“会写且写得准”。</p>
+          </div>
+          <div class="cards">
+            <div class="card green">
+              <h4>RAG 检索智能体</h4>
+              <p class="meta">面向查询，负责召回</p>
+              <ul>
+                <li>从企业资质、案例库、产品资料、制度文档中召回片段</li>
+                <li>支持按章节、主题、评分点定向检索</li>
+                <li>返回证据片段、来源、版本号、置信度</li>
+              </ul>
+            </div>
+            <div class="card green">
+              <h4>知识路由智能体</h4>
+              <p class="meta">决定去哪个知识库找什么</p>
+              <ul>
+                <li>识别请求属于资质、案例、技术方案、实施组织还是售后</li>
+                <li>把查询路由到对应索引或知识域</li>
+                <li>减少无关召回和上下文污染</li>
+              </ul>
+            </div>
+            <div class="card green">
+              <h4>证据绑定智能体</h4>
+              <p class="meta">负责“这句话的依据是什么”</p>
+              <ul>
+                <li>将写作段落绑定到具体 RAG 证据</li>
+                <li>标记缺证内容、弱证内容、冲突证据</li>
+                <li>为审核 Agent 提供可追溯引用链</li>
+              </ul>
+            </div>
+            <div class="card green">
+              <h4>图片资产检索智能体</h4>
+              <p class="meta">负责图从哪里来、是否可用</p>
+              <ul>
+                <li>从本地 RAG 图片库、项目素材库、历史标书附件中检索图片</li>
+                <li>按产品图、架构图、资质扫描件、案例现场图等类型筛选</li>
+                <li>返回图片路径、来源、用途标签和清晰度信息</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <div class="center">
+        <h2>核心系统目标</h2>
+        <p>
+          做一个面向“标书生成”的多智能体系统，而不是通用 Agent。系统主线应围绕
+          <strong>解析需求 → 检索证据 → 制定策略 → 分章写作 → 多轮评审 → 成稿装配</strong> 展开。
+        </p>
+        <div class="core-list">
+          <div><strong>输入：</strong>招标文件、企业知识库、历史标书、产品资料、项目约束</div>
+          <div><strong>推理：</strong>深度思考用于 requirement 拆解、评分导向规划、章节策略与冲突消解</div>
+          <div><strong>知识：</strong>当前阶段全部走 RAG，不联网，强调可追溯、可审计、可版本化</div>
+          <div><strong>输出：</strong>结构化大纲、章节草稿、证据引用、审查报告、最终 HTML/Word/PDF 成稿</div>
+        </div>
+      </div>
+
+      <div class="column">
+        <article class="cluster">
+          <div class="cluster-header">
+            <h3>3. 写作与整合层</h3>
+            <p>把 requirement 和知识真正转成高质量章节内容。</p>
+          </div>
+          <div class="cards">
+            <div class="card blue">
+              <h4>章节写作智能体</h4>
+              <p class="meta">按章节并行生产正文</p>
+              <ul>
+                <li>依据章级 brief、风格规范和证据集生成内容</li>
+                <li>区分技术方案、商务响应、实施计划、售后服务等模板</li>
+                <li>输出结构化草稿与待补充项</li>
+              </ul>
+            </div>
+            <div class="card blue">
+              <h4>措辞优化智能体</h4>
+              <p class="meta">负责专业表达和中标语气</p>
+              <ul>
+                <li>统一术语、口径、格式和语气</li>
+                <li>增强响应性、针对性和专业度</li>
+                <li>避免空话、套话、无依据夸大</li>
+              </ul>
+            </div>
+            <div class="card blue">
+              <h4>插图决策智能体</h4>
+              <p class="meta">负责哪里该放图、放什么图、由谁确认</p>
+              <ul>
+                <li>根据章节内容判断是否需要产品图、流程图、架构图、资质图或案例图</li>
+                <li>给用户提供候选图片和插入位置，而不是直接自动落图</li>
+                <li>输出图片插入建议单，供装配 Agent 执行</li>
+              </ul>
+            </div>
+            <div class="card gold">
+              <h4>成稿装配智能体</h4>
+              <p class="meta">负责章节拼装与交付</p>
+              <ul>
+                <li>将章节合并为最终目录结构</li>
+                <li>处理封面、目录、章节编号、附录清单</li>
+                <li>按用户选定结果插入图片、图题、编号和引用说明</li>
+                <li>导出 HTML 基稿，后续可扩到 DOCX/PDF</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+
+        <article class="cluster">
+          <div class="cluster-header">
+            <h3>4. 审核与闭环层</h3>
+            <p>这一层直接决定成品能不能投、会不会废标、分数会不会低。</p>
+          </div>
+          <div class="cards">
+            <div class="card">
+              <h4>合规审查智能体</h4>
+              <p class="meta">先查不能错的红线</p>
+              <ul>
+                <li>检查资格条件、格式要求、硬性响应、废标项</li>
+                <li>识别缺材料、漏响应、表述冲突</li>
+                <li>输出风险清单与整改建议</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>评分模拟智能体</h4>
+              <p class="meta">模拟评标专家视角</p>
+              <ul>
+                <li>按评分表评估每章节得分潜力</li>
+                <li>指出薄弱项与可加分项</li>
+                <li>反向驱动再次检索和重写</li>
+              </ul>
+            </div>
+            <div class="card">
+              <h4>一致性校对智能体</h4>
+              <p class="meta">负责全书前后不打架</p>
+              <ul>
+                <li>检查公司名、项目名、参数、工期、人员配置等一致性</li>
+                <li>识别重复段落、互相矛盾、引用失配</li>
+                <li>给装配 Agent 返回修订指令</li>
+              </ul>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section class="footer">
+      <article class="note">
+        <h3>建议第一期必须有的 Agent</h3>
+        <ul>
+          <li>总控编排智能体</li>
+          <li>招标文件解析智能体</li>
+          <li>写作策略规划智能体</li>
+          <li>RAG 检索智能体</li>
+          <li>证据绑定智能体</li>
+          <li>章节写作智能体</li>
+          <li>合规审查智能体</li>
+          <li>一致性校对智能体</li>
+          <li>成稿装配智能体</li>
+        </ul>
+      </article>
+
+      <article class="note">
+        <h3>建议第二期再加的 Agent</h3>
+        <ul>
+          <li>资质材料补全智能体：自动识别缺失附件和证明材料</li>
+          <li>案例匹配智能体：按行业、规模、能力标签自动挑选类似项目</li>
+          <li>价格响应智能体：报价说明、成本边界、风险提示</li>
+          <li>复盘学习智能体：把中标/废标结果回灌到知识库和策略层</li>
+          <li>人机协作审稿智能体：支持人工批注后再迭代重写</li>
+        </ul>
+      </article>
+    </section>
+
+    <section class="footer">
+      <article class="note">
+        <h3>图片插入建议的用户选择项</h3>
+        <ul>
+          <li>插图模式：不插图 / 仅关键章节 / 全文按需建议</li>
+          <li>图片来源：仅本项目素材 / 企业知识库 / 历史标书图库</li>
+          <li>图片类型：产品图 / 架构图 / 流程图 / 资质扫描件 / 案例现场图</li>
+          <li>插入方式：用户逐张确认 / 按章节批量确认 / 使用默认策略自动通过</li>
+          <li>版式要求：大图整行 / 图文左右排 / 小图并排 / 附录集中展示</li>
+        </ul>
+      </article>
+
+      <article class="note">
+        <h3>图片能力的最小闭环</h3>
+        <ul>
+          <li>先让图片资产检索智能体从本地资料库召回候选图</li>
+          <li>再由插图决策智能体生成“章节-图片-位置-用途”候选清单</li>
+          <li>最后给用户一个选择界面，确认后由成稿装配智能体落到 HTML</li>
+          <li>这样能避免图片乱插、错插、重复插，也方便后续扩展到 Word 导出</li>
+        </ul>
+      </article>
+    </section>
+  </div>
+</body>
+</html>

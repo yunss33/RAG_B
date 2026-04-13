@@ -1,0 +1,101 @@
+services:
+  frontend:
+    image: node:24-bookworm
+    working_dir: /app/apps/frontend
+    command: sh -c "npm install && npm run dev"
+    ports:
+      - "${FRONTEND_PORT:-3000}:3000"
+    environment:
+      NEXT_PUBLIC_API_BASE_URL: ${NEXT_PUBLIC_API_BASE_URL:-http://localhost:8100}
+      INTERNAL_API_BASE_URL: ${INTERNAL_API_BASE_URL:-http://api-gateway:8100}
+    volumes:
+      - .:/app
+    depends_on:
+      - api-gateway
+
+  api-gateway:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm
+    working_dir: /app
+    command: sh -c "uv sync && uv run uvicorn api_app.main:app --host 0.0.0.0 --port 8100"
+    ports:
+      - "${API_GATEWAY_PORT:-8100}:8100"
+    environment:
+      DEEPBS_DATA_DIR: ${DEEPBS_DATA_DIR:-/app/data}
+      DEEPBS_OBJECT_DIR: ${DEEPBS_OBJECT_DIR:-/app/data/objects}
+      DEEPBS_PUBLIC_OBJECT_BASE: ${DEEPBS_PUBLIC_OBJECT_BASE:-http://localhost:8100/objects}
+      DEEPBS_ORCHESTRATOR_BASE_URL: ${DEEPBS_ORCHESTRATOR_BASE_URL:-http://orchestrator:8101}
+      DEEPBS_RAG_SERVICE_BASE_URL: ${DEEPBS_RAG_SERVICE_BASE_URL:-http://rag-service:8102}
+    volumes:
+      - .:/app
+    depends_on:
+      - orchestrator
+      - rag-service
+
+  orchestrator:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm
+    working_dir: /app
+    command: sh -c "uv sync && uv run uvicorn orchestrator_app.main:app --host 0.0.0.0 --port 8101"
+    ports:
+      - "${ORCHESTRATOR_PORT:-8101}:8101"
+    environment:
+      DEEPBS_DATA_DIR: ${DEEPBS_DATA_DIR:-/app/data}
+      DEEPBS_PUBLIC_OBJECT_BASE: ${DEEPBS_PUBLIC_OBJECT_BASE:-http://localhost:8100/objects}
+      DEEPBS_AGENT_RUNTIME_BASE_URL: ${DEEPBS_AGENT_RUNTIME_BASE_URL:-http://agent-runtime:8103}
+    volumes:
+      - .:/app
+    depends_on:
+      - agent-runtime
+
+  rag-service:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm
+    working_dir: /app
+    command: sh -c "uv sync && uv run uvicorn rag_service_app.main:app --host 0.0.0.0 --port 8102"
+    ports:
+      - "${RAG_SERVICE_PORT:-8102}:8102"
+    environment:
+      DEEPBS_DATA_DIR: ${DEEPBS_DATA_DIR:-/app/data}
+      DEEPBS_OBJECT_DIR: ${DEEPBS_OBJECT_DIR:-/app/data/objects}
+      DEEPBS_PUBLIC_OBJECT_BASE: ${DEEPBS_PUBLIC_OBJECT_BASE:-http://localhost:8100/objects}
+    volumes:
+      - .:/app
+
+  agent-runtime:
+    image: ghcr.io/astral-sh/uv:python3.12-bookworm
+    working_dir: /app
+    command: sh -c "uv sync && uv run uvicorn agent_runtime_app.main:app --host 0.0.0.0 --port 8103"
+    ports:
+      - "${AGENT_RUNTIME_PORT:-8103}:8103"
+    environment:
+      DEEPBS_DATA_DIR: ${DEEPBS_DATA_DIR:-/app/data}
+      DEEPBS_PUBLIC_OBJECT_BASE: ${DEEPBS_PUBLIC_OBJECT_BASE:-http://localhost:8100/objects}
+    volumes:
+      - .:/app
+
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_USER: deepbs
+      POSTGRES_PASSWORD: deepbs
+      POSTGRES_DB: deepbs
+    ports:
+      - "5432:5432"
+
+  valkey:
+    image: valkey/valkey:8
+    ports:
+      - "6379:6379"
+
+  qdrant:
+    image: qdrant/qdrant:v1.14.1
+    ports:
+      - "6333:6333"
+
+  minio:
+    image: minio/minio:RELEASE.2025-03-12T18-04-18Z
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - "9000:9000"
+      - "9001:9001"

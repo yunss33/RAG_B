@@ -1,0 +1,162 @@
+:root {
+  --bg: #f4efe7;
+  --panel: #fffaf4;
+  --panel-alt: #fff1e0;
+  --ink: #251f18;
+  --muted: #6a5f52;
+  --line: #d9c8b0;
+  --accent: #b3562d;
+  --shadow: 0 16px 40px rgba(84, 51, 23, 0.1);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Microsoft YaHei", "PingFang SC", sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(179, 86, 45, 0.1), transparent 25%),
+    linear-gradient(180deg, #fbf7f0 0%, var(--bg) 100%);
+  color: var(--ink);
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.page {
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 28px 20px 56px;
+}
+
+.hero,
+.panel {
+  background: rgba(255, 250, 244, 0.94);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: var(--shadow);
+}
+
+.hero {
+  padding: 24px 28px;
+  margin-bottom: 18px;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 18px;
+}
+
+.stack,
+.list {
+  display: grid;
+  gap: 18px;
+}
+
+.panel {
+  padding: 18px 20px;
+}
+
+.panel h2,
+.hero h1 {
+  margin: 0 0 12px;
+}
+
+.muted {
+  color: var(--muted);
+}
+
+.card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 14px;
+}
+
+.project-card {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: start;
+}
+
+.pill {
+  display: inline-block;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: var(--panel-alt);
+  border: 1px solid var(--line);
+  font-size: 12px;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.button,
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: var(--accent);
+  color: white;
+  cursor: pointer;
+  font: inherit;
+}
+
+.button.secondary,
+button.secondary {
+  background: #755f49;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  margin-top: 6px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: white;
+  font: inherit;
+}
+
+label {
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th,
+.table td {
+  border: 1px solid var(--line);
+  padding: 10px;
+  text-align: left;
+  vertical-align: top;
+}
+
+.html-preview {
+  min-height: 460px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+}
+
+@media (max-width: 900px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+

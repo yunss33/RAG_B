@@ -1,0 +1,36 @@
+[project]
+name = "deepbs-backend"
+version = "0.1.0"
+description = "MVP backend services for bid-writing multi-agent platform"
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn[standard]>=0.34.0",
+  "httpx>=0.28.0",
+  "python-multipart>=0.0.20",
+  "pydantic>=2.10.0",
+  "pydantic-settings>=2.8.0"
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3.0"
+]
+
+[build-system]
+requires = ["setuptools>=75.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = [
+  "deepbs_common",
+  "api_app",
+  "orchestrator_app",
+  "rag_service_app",
+  "agent_runtime_app"
+]
+package-dir = {"" = "src"}
+
+[tool.pytest.ini_options]
+pythonpath = ["src"]
+testpaths = ["tests"]

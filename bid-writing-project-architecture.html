@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>标书多智能体项目架构图</title>
+  <style>
+    :root {
+      --bg: #f3efe8;
+      --paper: #fffaf4;
+      --paper-2: #fff4e5;
+      --ink: #231f1a;
+      --muted: #6d6153;
+      --line: #d7c8b3;
+      --accent: #b35a2f;
+      --blue: #2b5d7a;
+      --green: #426f49;
+      --gold: #93691a;
+      --shadow: 0 18px 48px rgba(65, 45, 24, 0.12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(179, 90, 47, 0.1), transparent 26%),
+        radial-gradient(circle at bottom right, rgba(43, 93, 122, 0.1), transparent 26%),
+        linear-gradient(180deg, #f8f5ef 0%, var(--bg) 100%);
+    }
+
+    .page {
+      max-width: 1520px;
+      margin: 0 auto;
+      padding: 32px 24px 56px;
+    }
+
+    .hero, .panel {
+      background: rgba(255, 250, 244, 0.93);
+      border: 1px solid rgba(215, 200, 179, 0.9);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px 30px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(179, 90, 47, 0.1);
+    }
+
+    h1 {
+      margin: 14px 0 10px;
+      font-size: clamp(28px, 4vw, 46px);
+      line-height: 1.08;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 1040px;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .legend span {
+      padding: 8px 12px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: var(--paper);
+      font-size: 13px;
+    }
+
+    .stack {
+      display: grid;
+      gap: 18px;
+      margin-bottom: 22px;
+    }
+
+    .layer {
+      position: relative;
+      padding: 18px 18px 16px;
+      overflow: hidden;
+    }
+
+    .layer::after {
+      content: "";
+      position: absolute;
+      inset: auto -40px -60px auto;
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(179, 90, 47, 0.08), transparent 66%);
+      pointer-events: none;
+    }
+
+    .layer-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .layer-header h2 {
+      margin: 0;
+      font-size: 24px;
+    }
+
+    .layer-header p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 14px 14px 12px;
+      min-height: 180px;
+      position: relative;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 14px;
+      bottom: 14px;
+      width: 4px;
+      border-radius: 999px;
+      background: var(--accent);
+    }
+
+    .card.blue::before { background: var(--blue); }
+    .card.green::before { background: var(--green); }
+    .card.gold::before { background: var(--gold); }
+
+    .card h3 {
+      margin: 0 0 8px 10px;
+      font-size: 17px;
+    }
+
+    .card .tag {
+      margin: 0 0 8px 10px;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .card ul {
+      margin: 0 0 0 26px;
+      padding: 0;
+      font-size: 14px;
+      line-height: 1.65;
+      color: #43392f;
+    }
+
+    .flow {
+      display: grid;
+      grid-template-columns: repeat(9, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .step {
+      background: linear-gradient(180deg, #fff8ef, #fff1df);
+      border: 1px solid rgba(215, 200, 179, 0.95);
+      border-radius: 18px;
+      padding: 14px 12px;
+      min-height: 126px;
+      position: relative;
+    }
+
+    .step:not(:last-child)::after {
+      content: "→";
+      position: absolute;
+      right: -10px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--accent);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .step strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .step span {
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 13px;
+    }
+
+    .bottom {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 18px;
+    }
+
+    .list {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    .matrix {
+      display: grid;
+      gap: 10px;
+    }
+
+    .matrix-item {
+      padding: 12px 14px;
+      border-radius: 16px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      line-height: 1.65;
+      font-size: 14px;
+    }
+
+    .matrix-item strong {
+      display: block;
+      color: var(--ink);
+      margin-bottom: 4px;
+    }
+
+    @media (max-width: 1280px) {
+      .cards {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .flow {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+      }
+
+      .step:not(:last-child)::after {
+        display: none;
+      }
+
+      .bottom {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 720px) {
+      .cards, .flow {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <span class="eyebrow">Docker First / RAG First / Human in the Loop</span>
+      <h1>标书写作多智能体项目架构图</h1>
+      <p>
+        这套架构适合你现在的阶段：先在 Docker 环境里把“招标解析、RAG 检索、章节写作、审查、插图选择、HTML 成稿”跑通，
+        用编排器控制多智能体，而不是做成完全自由对话的 Agent 社会。核心原则是强流程、强证据、强可追踪、关键节点可人工确认。
+      </p>
+      <div class="legend">
+        <span>接入层：前端与 API</span>
+        <span>编排层：任务状态机 + 多智能体调度</span>
+        <span>能力层：解析 / 写作 / 审查 / 插图</span>
+        <span>知识层：RAG、证据绑定、图片资产</span>
+        <span>存储层：Postgres / Redis / MinIO / Qdrant</span>
+      </div>
+    </section>
+
+    <section class="stack">
+      <article class="panel layer">
+        <div class="layer-header">
+          <h2>一、Docker 服务分层</h2>
+          <p>推荐先用 Docker Compose，不要一开始上 Kubernetes</p>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <h3>frontend</h3>
+            <p class="tag">Next.js / 管理台与预览端</p>
+            <ul>
+              <li>上传招标文件、知识资料、图片素材</li>
+              <li>展示章节生成进度与 Agent 状态</li>
+              <li>提供图片候选选择界面</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>api-gateway</h3>
+            <p class="tag">FastAPI / 统一入口</p>
+            <ul>
+              <li>项目、任务、文件、权限接口</li>
+              <li>触发编排任务与查询状态</li>
+              <li>承接前端与内部服务协议</li>
+            </ul>
+          </div>
+          <div class="card blue">
+            <h3>orchestrator</h3>
+            <p class="tag">多智能体总控核心</p>
+            <ul>
+              <li>拆任务、建 DAG、控重试</li>
+              <li>决定哪些 Agent 并行或串行</li>
+              <li>维护项目级上下文与阶段状态</li>
+            </ul>
+          </div>
+          <div class="card blue">
+            <h3>agent-runtime</h3>
+            <p class="tag">统一执行各类 Agent</p>
+            <ul>
+              <li>招标解析、规划、写作、审查、插图</li>
+              <li>统一 Prompt、工具调用、上下文装载</li>
+              <li>输出标准化结果给编排器</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel layer">
+        <div class="layer-header">
+          <h2>二、知识与数据底座</h2>
+          <p>不联网条件下，知识库就是系统的大脑</p>
+        </div>
+        <div class="cards">
+          <div class="card green">
+            <h3>rag-service</h3>
+            <p class="tag">检索、重排、证据回传</p>
+            <ul>
+              <li>文档切片、Embedding、召回、重排</li>
+              <li>支持章节级 query 与评分点检索</li>
+              <li>返回证据片段与来源元数据</li>
+            </ul>
+          </div>
+          <div class="card green">
+            <h3>qdrant</h3>
+            <p class="tag">向量索引</p>
+            <ul>
+              <li>企业资料库</li>
+              <li>历史标书库</li>
+              <li>图片与附件元数据索引</li>
+            </ul>
+          </div>
+          <div class="card gold">
+            <h3>minio</h3>
+            <p class="tag">对象存储</p>
+            <ul>
+              <li>PDF、DOCX、图片、扫描件</li>
+              <li>中间稿与最终 HTML 成稿</li>
+              <li>附件、封面、图表素材</li>
+            </ul>
+          </div>
+          <div class="card gold">
+            <h3>postgres + redis</h3>
+            <p class="tag">业务数据 + 队列缓存</p>
+            <ul>
+              <li>项目、任务、章节、引用、审查结果</li>
+              <li>任务队列、缓存、锁与会话态</li>
+              <li>人工确认节点状态</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel layer">
+        <div class="layer-header">
+          <h2>三、核心 Agent 分工</h2>
+          <p>不要自由漫游，全部挂在编排器下面执行</p>
+        </div>
+        <div class="cards">
+          <div class="card blue">
+            <h3>招标解析 Agent</h3>
+            <p class="tag">输入：招标文件</p>
+            <ul>
+              <li>抽取资格项、评分项、废标项</li>
+              <li>生成结构化 requirement schema</li>
+            </ul>
+          </div>
+          <div class="card blue">
+            <h3>策略规划 Agent</h3>
+            <p class="tag">输入：requirements + 项目目标</p>
+            <ul>
+              <li>制定章节策略与写作优先级</li>
+              <li>定义每章需要的证据类型</li>
+            </ul>
+          </div>
+          <div class="card green">
+            <h3>RAG / 证据 Agent</h3>
+            <p class="tag">输入：章级 query</p>
+            <ul>
+              <li>召回证据、绑定来源、标记缺证</li>
+              <li>把知识变成可引用材料</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>章节写作 Agent</h3>
+            <p class="tag">输入：brief + evidence</p>
+            <ul>
+              <li>并行生成技术、商务、实施、售后章节</li>
+              <li>输出草稿与待补资料项</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>合规审查 Agent</h3>
+            <p class="tag">输入：草稿 + requirements</p>
+            <ul>
+              <li>检查漏响应、格式风险、废标风险</li>
+              <li>输出整改意见</li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>一致性校对 Agent</h3>
+            <p class="tag">输入：全书草稿</p>
+            <ul>
+              <li>检查参数、项目名、时间、人员一致性</li>
+              <li>发现前后冲突与重复</li>
+            </ul>
+          </div>
+          <div class="card gold">
+            <h3>插图决策 Agent</h3>
+            <p class="tag">输入：章节内容 + 图片库</p>
+            <ul>
+              <li>生成插图建议，不直接自动插图</li>
+              <li>等待用户确认候选图</li>
+            </ul>
+          </div>
+          <div class="card gold">
+            <h3>成稿装配 Agent</h3>
+            <p class="tag">输入：终稿章节 + 图片选择</p>
+            <ul>
+              <li>合并目录、章节、图题、附录</li>
+              <li>输出 HTML，后续扩展 DOCX/PDF</li>
+            </ul>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel layer">
+        <div class="layer-header">
+          <h2>四、项目主流程</h2>
+          <p>这条链路适合做成状态机，每一步都可追踪</p>
+        </div>
+        <div class="flow">
+          <div class="step">
+            <strong>1. 创建项目</strong>
+            <span>上传招标文件、企业知识、历史案例、图片资产</span>
+          </div>
+          <div class="step">
+            <strong>2. 招标解析</strong>
+            <span>提取 requirements、评分点、废标项、格式约束</span>
+          </div>
+          <div class="step">
+            <strong>3. 制定策略</strong>
+            <span>定义章节结构、写作策略、证据需求</span>
+          </div>
+          <div class="step">
+            <strong>4. RAG 取证</strong>
+            <span>按章节召回企业资料、案例、资质和图片候选</span>
+          </div>
+          <div class="step">
+            <strong>5. 并行写作</strong>
+            <span>多章节并行起草，统一格式与语气</span>
+          </div>
+          <div class="step">
+            <strong>6. 多轮审查</strong>
+            <span>合规、一致性、评分模拟反推修订</span>
+          </div>
+          <div class="step">
+            <strong>7. 图片选择</strong>
+            <span>给用户候选图和插入位置，人工确认</span>
+          </div>
+          <div class="step">
+            <strong>8. 成稿装配</strong>
+            <span>插图、编号、目录、附录统一输出</span>
+          </div>
+          <div class="step">
+            <strong>9. 导出交付</strong>
+            <span>生成 HTML 成稿，并保留可追溯证据链</span>
+          </div>
+        </div>
+      </article>
+    </section>
+
+    <section class="bottom">
+      <article class="panel layer">
+        <div class="layer-header">
+          <h2>五、建议目录结构</h2>
+          <p>适合单仓启动，后续再拆服务</p>
+        </div>
+        <ul class="list">
+          <li><code>apps/frontend</code>：前端管理台与预览端</li>
+          <li><code>apps/api</code>：网关接口与项目服务</li>
+          <li><code>apps/orchestrator</code>：编排器、状态机、任务流</li>
+          <li><code>apps/agent-runtime</code>：各类 Agent 执行器</li>
+          <li><code>apps/rag-service</code>：文档导入、切片、检索、重排</li>
+          <li><code>packages/common</code>：共享 schema、DTO、枚举、日志协议</li>
+          <li><code>packages/prompts</code>：各 Agent Prompt 模板与策略</li>
+          <li><code>infra/docker</code>：compose、nginx、初始化脚本</li>
+        </ul>
+      </article>
+
+      <article class="panel layer">
+        <div class="layer-header">
+          <h2>六、关键设计决策</h2>
+          <p>先把方向定对，后面实现会轻很多</p>
+        </div>
+        <div class="matrix">
+          <div class="matrix-item">
+            <strong>编排模式</strong>
+            用 Supervisor + 状态机，不用开放式 Agent 自由对话。
+          </div>
+          <div class="matrix-item">
+            <strong>图片策略</strong>
+            图片必须经过“候选 -> 用户确认 -> 成稿装配”。
+          </div>
+          <div class="matrix-item">
+            <strong>RAG 原则</strong>
+            所有关键结论尽量绑定证据来源，减少幻觉和夸大。
+          </div>
+          <div class="matrix-item">
+            <strong>部署策略</strong>
+            先 Docker Compose 单机跑通，再考虑服务拆分和扩容。
+          </div>
+        </div>
+      </article>
+    </section>
+  </div>
+</body>
+</html>

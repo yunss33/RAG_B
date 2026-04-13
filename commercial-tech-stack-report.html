@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>标书多智能体项目商业可用技术选型报告</title>
+  <style>
+    :root {
+      --bg: #f5f1ea;
+      --paper: #fffaf4;
+      --paper-strong: #fff3e1;
+      --ink: #241f19;
+      --muted: #6c6052;
+      --line: #d9c8b2;
+      --accent: #b2542d;
+      --blue: #2a5c79;
+      --green: #426d48;
+      --gold: #966819;
+      --red: #9c3b33;
+      --shadow: 0 18px 42px rgba(71, 47, 24, 0.12);
+      --radius: 22px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(circle at top left, rgba(178, 84, 45, 0.08), transparent 28%),
+        radial-gradient(circle at bottom right, rgba(42, 92, 121, 0.08), transparent 24%),
+        linear-gradient(180deg, #faf7f2 0%, var(--bg) 100%);
+    }
+
+    .page {
+      max-width: 1480px;
+      margin: 0 auto;
+      padding: 30px 22px 56px;
+    }
+
+    .hero, .panel {
+      background: rgba(255, 250, 244, 0.94);
+      border: 1px solid rgba(217, 200, 178, 0.92);
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      padding: 28px 30px;
+      margin-bottom: 22px;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      padding: 8px 12px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(178, 84, 45, 0.1);
+    }
+
+    h1 {
+      margin: 14px 0 10px;
+      font-size: clamp(28px, 4vw, 44px);
+      line-height: 1.08;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 1080px;
+      color: var(--muted);
+      line-height: 1.75;
+      font-size: 16px;
+    }
+
+    .chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .chips span {
+      padding: 8px 12px;
+      border-radius: 999px;
+      background: var(--paper);
+      border: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .grid {
+      display: grid;
+      gap: 18px;
+    }
+
+    .two {
+      grid-template-columns: 1.2fr 0.8fr;
+    }
+
+    .three {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .panel {
+      padding: 18px 20px;
+    }
+
+    .panel h2 {
+      margin: 0 0 12px;
+      font-size: 24px;
+    }
+
+    .panel p {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.75;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 10px;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 12px 12px;
+      vertical-align: top;
+      text-align: left;
+      font-size: 14px;
+      line-height: 1.65;
+      background: rgba(255,255,255,0.52);
+    }
+
+    th {
+      background: rgba(255, 243, 225, 0.95);
+      font-size: 13px;
+      letter-spacing: 0.02em;
+    }
+
+    .status {
+      display: inline-block;
+      padding: 4px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .ok { background: rgba(66, 109, 72, 0.12); color: var(--green); }
+    .warn { background: rgba(150, 104, 25, 0.14); color: var(--gold); }
+    .risk { background: rgba(156, 59, 51, 0.12); color: var(--red); }
+
+    .card {
+      background: var(--paper);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+    }
+
+    .card h3 {
+      margin: 0 0 10px;
+      font-size: 18px;
+    }
+
+    .card ul {
+      margin: 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .decision {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .decision-item {
+      background: linear-gradient(180deg, #fff8ef, #fff2e2);
+      border: 1px solid rgba(217, 200, 178, 0.95);
+      border-radius: 16px;
+      padding: 14px 15px;
+    }
+
+    .decision-item strong {
+      display: block;
+      margin-bottom: 6px;
+      font-size: 16px;
+    }
+
+    .decision-item span {
+      color: var(--muted);
+      line-height: 1.7;
+      font-size: 14px;
+    }
+
+    @media (max-width: 1100px) {
+      .two, .three {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <section class="hero">
+      <span class="eyebrow">商业可用 / 多语言 / 人机交互 / Docker 优先</span>
+      <h1>标书多智能体项目商业可用技术选型报告</h1>
+      <p>
+        这份报告的目标不是罗列技术名词，而是帮你筛掉许可证风险、定下主框架，并明确这类项目为什么更适合 Python + Web 工作台，而不是单纯 Java 后端。结论上，这个项目建议采用
+        <strong>Python 作为 AI 与编排主后端，Next.js 作为人机交互前端</strong>，并尽量选择许可证更清晰的基础设施组件。
+      </p>
+      <div class="chips">
+        <span>主后端：Python</span>
+        <span>前端：Next.js</span>
+        <span>向量库：Qdrant</span>
+        <span>数据库：PostgreSQL</span>
+        <span>缓存建议：Valkey</span>
+        <span>对象存储：谨慎评估 MinIO</span>
+      </div>
+    </section>
+
+    <section class="grid">
+      <article class="panel">
+        <h2>一、组件许可证与商业可用性判断</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>组件</th>
+              <th>许可证</th>
+              <th>商业使用判断</th>
+              <th>建议</th>
+              <th>备注</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Next.js</td>
+              <td>MIT</td>
+              <td><span class="status ok">可商用</span></td>
+              <td>推荐</td>
+              <td>前端生态成熟，适合工作台、多语言、预览与交互页面</td>
+            </tr>
+            <tr>
+              <td>FastAPI</td>
+              <td>MIT</td>
+              <td><span class="status ok">可商用</span></td>
+              <td>推荐</td>
+              <td>适合 AI API、任务编排接口、文件服务、Agent 网关</td>
+            </tr>
+            <tr>
+              <td>PostgreSQL</td>
+              <td>PostgreSQL License</td>
+              <td><span class="status ok">可商用</span></td>
+              <td>推荐</td>
+              <td>许可证宽松，企业级稳定，适合业务主数据库</td>
+            </tr>
+            <tr>
+              <td>Qdrant</td>
+              <td>Apache 2.0</td>
+              <td><span class="status ok">可商用</span></td>
+              <td>推荐</td>
+              <td>轻量、Docker 友好，适合 RAG 起步阶段</td>
+            </tr>
+            <tr>
+              <td>Valkey</td>
+              <td>BSD</td>
+              <td><span class="status ok">可商用</span></td>
+              <td>推荐</td>
+              <td>适合替代新版 Redis，许可证压力更低</td>
+            </tr>
+            <tr>
+              <td>Redis</td>
+              <td>近年许可证较复杂</td>
+              <td><span class="status warn">需谨慎</span></td>
+              <td>可替换</td>
+              <td>能用，但商业合规判断不如过去简单，优先考虑 Valkey</td>
+            </tr>
+            <tr>
+              <td>MinIO</td>
+              <td>AGPLv3 / 商业许可</td>
+              <td><span class="status risk">需重点评估</span></td>
+              <td>谨慎使用</td>
+              <td>不是不能商用，但若你担心 AGPL 合规，最好先评估部署方式或换方案</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <div class="grid two">
+        <article class="panel">
+          <h2>二、底层框架选择：Python 还是 Java</h2>
+          <div class="decision">
+            <div class="decision-item">
+              <strong>推荐结论：主后端选 Python</strong>
+              <span>你的核心问题是多智能体、RAG、文档解析、提示编排、证据绑定、内容生成与审查，这些都属于 AI 产品栈，Python 生态明显更强，也更快落地。</span>
+            </div>
+            <div class="decision-item">
+              <strong>Java 不适合做这一期主控</strong>
+              <span>Java 更适合传统中后台、重事务和企业集成。但你当前最重的是 AI 编排与文档智能，不是银行级交易链路。用 Java 做主干，会把很多 AI 相关开发成本抬高。</span>
+            </div>
+            <div class="decision-item">
+              <strong>合理分工</strong>
+              <span>Python 负责 Agent、RAG、文档处理、编排与任务流；Next.js 负责所有人机交互。以后真要接很多政企 Java 系统，再单独补 Java 集成层，而不是反过来。</span>
+            </div>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>三、为什么这个项目必须做人机交互</h2>
+          <div class="card">
+            <h3>这不是“自动写文”工具</h3>
+            <ul>
+              <li>标书里很多节点不能完全自动化，尤其是图片插入、资质选择、案例挑选、风险判断</li>
+              <li>用户需要在关键节点确认，而不是等系统最后一次性吐出结果</li>
+              <li>更好的形态是“Agent 工作台”，不是一个聊天框解决所有事情</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+
+      <article class="panel">
+        <h2>四、推荐技术栈</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>层</th>
+              <th>推荐技术</th>
+              <th>为什么</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>前端工作台</td>
+              <td>Next.js</td>
+              <td>适合项目工作台、文件上传、流程进度、图片选择、HTML 预览、多语言界面</td>
+            </tr>
+            <tr>
+              <td>API 与项目服务</td>
+              <td>FastAPI</td>
+              <td>接口开发快，适合文件、任务、项目、审查结果等业务 API</td>
+            </tr>
+            <tr>
+              <td>多智能体编排</td>
+              <td>Python 自研 orchestrator</td>
+              <td>便于控制任务状态机、Agent DAG、人工确认节点和失败重试</td>
+            </tr>
+            <tr>
+              <td>Agent 执行层</td>
+              <td>Python</td>
+              <td>适合 Prompt、LLM SDK、检索工具调用、文档处理与规则审查</td>
+            </tr>
+            <tr>
+              <td>RAG 服务</td>
+              <td>Python + Qdrant</td>
+              <td>文档切片、Embedding、召回、重排、证据绑定都更适合 Python 生态</td>
+            </tr>
+            <tr>
+              <td>业务数据库</td>
+              <td>PostgreSQL</td>
+              <td>适合项目、章节、任务、引用、人工确认状态等结构化数据</td>
+            </tr>
+            <tr>
+              <td>缓存与队列</td>
+              <td>Valkey</td>
+              <td>用作队列、缓存、任务状态和锁，比新版 Redis 更省许可证顾虑</td>
+            </tr>
+            <tr>
+              <td>对象存储</td>
+              <td>对象存储服务 / 谨慎使用 MinIO</td>
+              <td>存招标文件、企业资料、图片、HTML 成稿、附件，注意许可证与部署方式</td>
+            </tr>
+          </tbody>
+        </table>
+      </article>
+
+      <div class="grid three">
+        <article class="panel">
+          <h2>五、多语言能力怎么做</h2>
+          <div class="card">
+            <h3>建议分两层</h3>
+            <ul>
+              <li>界面多语言：前端 i18n，支持中文、英文，后续可继续扩</li>
+              <li>内容多语言：标书正文按项目配置输出中文、英文或双语</li>
+              <li>RAG 层记录文档语言，写作 Agent 根据目标语言输出</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>六、MVP 必要页面</h2>
+          <div class="card">
+            <h3>先做工作台</h3>
+            <ul>
+              <li>项目创建页</li>
+              <li>资料上传页</li>
+              <li>招标解析结果确认页</li>
+              <li>章节计划确认页</li>
+              <li>图片候选选择页</li>
+              <li>终稿预览页</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="panel">
+          <h2>七、最终建议</h2>
+          <div class="card">
+            <h3>定型方案</h3>
+            <ul>
+              <li>主语言选 Python</li>
+              <li>前端选 Next.js</li>
+              <li>缓存优先 Valkey</li>
+              <li>向量库用 Qdrant</li>
+              <li>部署先 Docker Compose</li>
+              <li>坚持人机协作，不做全自动黑盒</li>
+            </ul>
+          </div>
+        </article>
+      </div>
+    </section>
+  </div>
+</body>
+</html>
