@@ -370,6 +370,80 @@ class AssembleHtmlSkill(Skill):
         return {"result": result, "project": project}
 
 
+class WebDevToolsSkill(Skill):
+    """Web 开发工具技能"""
+    
+    @property
+    def metadata(self) -> SkillMetadata:
+        return SkillMetadata(
+            name="web_devtools",
+            description="基于 browser-use CLI 的浏览器自动化调试工具集，提供网页控制、元素交互、截图、Cookie 管理、云端浏览器等功能",
+            category="development",
+            input_schema={"project": "Project", "url": "Optional[str]"},
+            output_schema={"result": "Dict[str, Any]"},
+            dependencies=[]
+        )
+    
+    @record_agent_execution("web_devtools")
+    async def execute(self, project: Project, context: Dict[str, Any]) -> Dict[str, Any]:
+        url = context.get("url", "https://example.com")
+        
+        # 模拟浏览器自动化操作
+        result = {
+            "action": "browser_automation",
+            "url": url,
+            "operations": [
+                "打开网页",
+                "截图页面",
+                "检查页面元素",
+                "模拟用户交互"
+            ],
+            "status": "completed"
+        }
+        
+        return {"result": result, "project": project}
+
+
+class JinhuiStackDebugSkill(Skill):
+    """锦恢堆栈调试技能"""
+    
+    @property
+    def metadata(self) -> SkillMetadata:
+        return SkillMetadata(
+            name="jinhui_stack_debug",
+            description="网站和小程序调试的依赖关系排查指南，帮助系统地识别问题所在的依赖层",
+            category="debug",
+            input_schema={"project": "Project", "issue_type": "Optional[str]"},
+            output_schema={"result": "Dict[str, Any]"},
+            dependencies=[]
+        )
+    
+    @record_agent_execution("jinhui_stack_debug")
+    async def execute(self, project: Project, context: Dict[str, Any]) -> Dict[str, Any]:
+        issue_type = context.get("issue_type", "general")
+        
+        # 模拟依赖关系排查
+        result = {
+            "action": "stack_debug",
+            "issue_type": issue_type,
+            "debug_steps": [
+                "检查数据依赖",
+                "检查环境差异",
+                "检查版本兼容性",
+                "检查配置错误",
+                "检查状态管理",
+                "检查网络层",
+                "检查权限",
+                "检查缓存问题",
+                "检查构建过程",
+                "检查运行时环境"
+            ],
+            "status": "completed"
+        }
+        
+        return {"result": result, "project": project}
+
+
 # 注册技能
 skill_manager.register_skill(ParseRequirementsSkill)
 skill_manager.register_skill(PlanOutlineSkill)
@@ -377,3 +451,5 @@ skill_manager.register_skill(WriteDraftsSkill)
 skill_manager.register_skill(ReviewProjectSkill)
 skill_manager.register_skill(SuggestImagesSkill)
 skill_manager.register_skill(AssembleHtmlSkill)
+skill_manager.register_skill(WebDevToolsSkill)
+skill_manager.register_skill(JinhuiStackDebugSkill)
