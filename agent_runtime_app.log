@@ -13,3 +13,732 @@
 2026-04-13 10:40:29,395 - agent_runtime_app - INFO - Health check requested
 2026-04-13 10:40:29,395 - agent_runtime_app - INFO - Agent logic module is healthy
 2026-04-13 10:40:29,395 - agent_runtime_app - INFO - Health check completed with status: ok
+2026-04-13 10:42:11,699 - agent_runtime_app - ERROR - Unhandled exception: Dependency skill parse_requirements has not been executed yet
+2026-04-13 10:42:11,711 - agent_runtime_app - ERROR -   + Exception Group Traceback (most recent call last):
+  |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 81, in collapse_excgroups
+  |     yield
+  |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 192, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/workspace/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 107, in metrics_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 93, in rate_limit_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 96, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 154, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 680, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 134, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 120, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 674, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 174, in plan
+    |     result = await run_agent_workflow(request.project, "plan")
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/deepbs_common/langgraph_workflow.py", line 127, in run_agent_workflow
+    |     raise Exception(result["error"])
+    | Exception: Dependency skill parse_requirements has not been executed yet
+    +------------------------------------
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 107, in metrics_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 93, in rate_limit_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 96, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 154, in simple_response
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 174, in plan
+    result = await run_agent_workflow(request.project, "plan")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/deepbs_common/langgraph_workflow.py", line 127, in run_agent_workflow
+    raise Exception(result["error"])
+Exception: Dependency skill parse_requirements has not been executed yet
+
+2026-04-13 10:42:13,650 - agent_runtime_app - ERROR - Unhandled exception: Dependency skill plan_outline has not been executed yet
+2026-04-13 10:42:13,658 - agent_runtime_app - ERROR -   + Exception Group Traceback (most recent call last):
+  |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 81, in collapse_excgroups
+  |     yield
+  |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 192, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/workspace/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 107, in metrics_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 93, in rate_limit_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 96, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 154, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 680, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 134, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 120, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 674, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 181, in write
+    |     result = await run_agent_workflow(request.project, "write")
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/deepbs_common/langgraph_workflow.py", line 127, in run_agent_workflow
+    |     raise Exception(result["error"])
+    | Exception: Dependency skill plan_outline has not been executed yet
+    +------------------------------------
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 107, in metrics_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 93, in rate_limit_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 96, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 154, in simple_response
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 181, in write
+    result = await run_agent_workflow(request.project, "write")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/deepbs_common/langgraph_workflow.py", line 127, in run_agent_workflow
+    raise Exception(result["error"])
+Exception: Dependency skill plan_outline has not been executed yet
+
+2026-04-13 10:42:16,454 - agent_runtime_app - INFO - Health check requested
+2026-04-13 10:42:16,454 - agent_runtime_app - INFO - Agent logic module is healthy
+2026-04-13 10:42:16,454 - agent_runtime_app - INFO - Health check completed with status: ok
+2026-04-13 10:42:17,494 - agent_runtime_app - INFO - Health check requested
+2026-04-13 10:42:17,494 - agent_runtime_app - INFO - Agent logic module is healthy
+2026-04-13 10:42:17,494 - agent_runtime_app - INFO - Health check completed with status: ok
+2026-04-13 10:42:17,676 - agent_runtime_app - INFO - Health check requested
+2026-04-13 10:42:17,677 - agent_runtime_app - INFO - Agent logic module is healthy
+2026-04-13 10:42:17,677 - agent_runtime_app - INFO - Health check completed with status: ok
+2026-04-13 10:42:20,921 - agent_runtime_app - ERROR - Unhandled exception: Dependency skill parse_requirements has not been executed yet
+2026-04-13 10:42:20,929 - agent_runtime_app - ERROR -   + Exception Group Traceback (most recent call last):
+  |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 81, in collapse_excgroups
+  |     yield
+  |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 192, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/workspace/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 107, in metrics_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 93, in rate_limit_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 96, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 154, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 680, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 134, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 120, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 674, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 174, in plan
+    |     result = await run_agent_workflow(request.project, "plan")
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/deepbs_common/langgraph_workflow.py", line 127, in run_agent_workflow
+    |     raise Exception(result["error"])
+    | Exception: Dependency skill parse_requirements has not been executed yet
+    +------------------------------------
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 107, in metrics_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 93, in rate_limit_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 96, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 154, in simple_response
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 174, in plan
+    result = await run_agent_workflow(request.project, "plan")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/deepbs_common/langgraph_workflow.py", line 127, in run_agent_workflow
+    raise Exception(result["error"])
+Exception: Dependency skill parse_requirements has not been executed yet
+
+2026-04-13 10:42:22,168 - agent_runtime_app - ERROR - Unhandled exception: Dependency skill parse_requirements has not been executed yet
+2026-04-13 10:42:22,178 - agent_runtime_app - ERROR -   + Exception Group Traceback (most recent call last):
+  |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 81, in collapse_excgroups
+  |     yield
+  |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 192, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ~~~~~~~~~~~~~~~~~~~~~~~^^
+  |   File "/workspace/.venv/lib/python3.14/site-packages/anyio/_backends/_asyncio.py", line 799, in __aexit__
+  |     raise BaseExceptionGroup(
+  |         "unhandled errors in a TaskGroup", self._exceptions
+  |     ) from None
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 107, in metrics_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ~~~~~~~~~~~~~~~~~~^^
+    |   File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    |     self.gen.throw(value)
+    |     ~~~~~~~~~~~~~~^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 93, in rate_limit_middleware
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    |     raise app_exc from app_exc.__cause__ or app_exc.__context__
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 96, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 154, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 680, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 134, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 120, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 674, in app
+    |     raw_response = await run_endpoint_function(
+    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |     ...<3 lines>...
+    |     )
+    |     ^
+    |   File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    |     return await dependant.call(**values)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/agent_runtime_app/main.py", line 174, in plan
+    |     result = await run_agent_workflow(request.project, "plan")
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/workspace/src/deepbs_common/langgraph_workflow.py", line 127, in run_agent_workflow
+    |     raise Exception(result["error"])
+    | Exception: Dependency skill parse_requirements has not been executed yet
+    +------------------------------------
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 107, in metrics_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 191, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ~~~~~~~~~~~~~~~~~~^^
+  File "/root/.pyenv/versions/3.14.3/lib/python3.14/contextlib.py", line 162, in __exit__
+    self.gen.throw(value)
+    ~~~~~~~~~~~~~~^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_utils.py", line 87, in collapse_excgroups
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 193, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 93, in rate_limit_middleware
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 168, in call_next
+    raise app_exc from app_exc.__cause__ or app_exc.__context__
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 96, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/cors.py", line 154, in simple_response
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/middleware/asyncexitstack.py", line 18, in __call__
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 660, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 680, in app
+    await route.handle(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/routing.py", line 276, in handle
+    await self.app(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 134, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/workspace/.venv/lib/python3.14/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 120, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 674, in app
+    raw_response = await run_endpoint_function(
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+    )
+    ^
+  File "/workspace/.venv/lib/python3.14/site-packages/fastapi/routing.py", line 328, in run_endpoint_function
+    return await dependant.call(**values)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/agent_runtime_app/main.py", line 174, in plan
+    result = await run_agent_workflow(request.project, "plan")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/workspace/src/deepbs_common/langgraph_workflow.py", line 127, in run_agent_workflow
+    raise Exception(result["error"])
+Exception: Dependency skill parse_requirements has not been executed yet
+
