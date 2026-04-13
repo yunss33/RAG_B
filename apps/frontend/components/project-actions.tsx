@@ -21,7 +21,7 @@ export function ProjectActions({ projectId }: { projectId: string }) {
     <div className="actions">
       <button onClick={() => doAction("/ingest")}>资料入库</button>
       <button className="secondary" onClick={() => doAction("/run")}>启动主流程</button>
-      {message ? <span className="muted">{message}</span> : null}
+      {message ? <span className="muted mt-2">{message}</span> : null}
     </div>
   );
 }
