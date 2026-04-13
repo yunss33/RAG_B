@@ -1,6 +1,6 @@
 # 投标文档生成系统 - 实现计划
 
-## [ ] 任务 1: 检查和配置LLM设置
+## [/] 任务 1: 检查和配置LLM设置
 - **Priority**: P0
 - **Depends On**: None
 - **Description**: 
