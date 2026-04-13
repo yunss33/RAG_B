@@ -30,4 +30,5 @@ tests/test_api.py
 tests/test_integration.py
 tests/test_outline_planning.py
 tests/test_repository.py
+tests/test_skill_error_handling.py
 tests/test_skill_system.py
