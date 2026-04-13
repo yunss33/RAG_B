@@ -28,7 +28,7 @@ interface Task {
   logId?: string;
 }
 
-export default function ProjectDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function ProjectDetailPage({ params }: { params: { id: string } }) {
   const [projectId, setProjectId] = useState<string>('');
   const [status, setStatus] = useState<any>(null);
   const [project, setProject] = useState<any>(null);
@@ -39,7 +39,7 @@ export default function ProjectDetailPage({ params }: { params: Promise<{ id: st
 
   useEffect(() => {
     async function loadData() {
-      const { id } = await params;
+      const { id } = params;
       setProjectId(id);
       const [statusData, projectData] = await Promise.all([
         getProjectStatus(id),
