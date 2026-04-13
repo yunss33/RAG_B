@@ -74,7 +74,7 @@ export async function executeSkill(skillName: string, projectId: string, context
     headers: {
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ project: { id: projectId }, context }),
+    body: JSON.stringify({ project: { id: projectId, name: "Test Project" }, context }),
     cache: "no-store"
   });
   return parseJson<any>(response);

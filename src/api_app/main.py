@@ -490,3 +490,45 @@ async def get_skills():
         raise HTTPException(status_code=500, detail=f"技能服务错误: {str(exc)}") from exc
     except httpx.HTTPStatusError as exc:
         raise HTTPException(status_code=exc.response.status_code, detail=f"技能服务返回错误: {exc.response.text}") from exc
+
+
+@app.get("/internal/skills")
+async def get_internal_skills():
+    """获取所有可用技能（内部接口）"""
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(f"{settings.agent_runtime_base_url}/internal/skills")
+            response.raise_for_status()
+            return response.json()
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=500, detail=f"技能服务错误: {str(exc)}") from exc
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(status_code=exc.response.status_code, detail=f"技能服务返回错误: {exc.response.text}") from exc
+
+
+@app.post("/internal/skills/recommend")
+async def recommend_skills(request: dict):
+    """推荐适合的技能组合"""
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(f"{settings.agent_runtime_base_url}/internal/skills/recommend", json=request)
+            response.raise_for_status()
+            return response.json()
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=500, detail=f"技能服务错误: {str(exc)}") from exc
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(status_code=exc.response.status_code, detail=f"技能服务返回错误: {exc.response.text}") from exc
+
+
+@app.post("/internal/skills/execute/{skill_name}")
+async def execute_skill(skill_name: str, request: dict):
+    """执行指定技能"""
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.post(f"{settings.agent_runtime_base_url}/internal/skills/execute/{skill_name}", json=request)
+            response.raise_for_status()
+            return response.json()
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=500, detail=f"技能服务错误: {str(exc)}") from exc
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(status_code=exc.response.status_code, detail=f"技能服务返回错误: {exc.response.text}") from exc

@@ -1,1 +1,4 @@
-{}
+{
+  "/skills/page": "app/skills/page.js",
+  "/flow/page": "app/flow/page.js"
+}

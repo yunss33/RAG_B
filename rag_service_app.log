@@ -14,3 +14,4 @@
 2026-04-13 10:03:09,426 - rag_service_app - INFO - Embedding service is healthy
 2026-04-13 10:03:09,426 - rag_service_app - INFO - Health check completed with status: degraded
 2026-04-13 10:12:57,685 - rag_service_app - INFO - RAG功能已禁用
+2026-04-13 10:21:47,768 - rag_service_app - INFO - RAG功能已禁用

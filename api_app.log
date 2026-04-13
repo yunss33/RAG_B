@@ -23,3 +23,5 @@
 2026-04-13 10:03:09,560 - api_app - INFO - Health check completed with status: ok
 2026-04-13 10:03:16,738 - httpx - INFO - HTTP Request: GET http://localhost:8103/internal/skills "HTTP/1.1 404 Not Found"
 2026-04-13 10:04:12,209 - httpx - INFO - HTTP Request: GET http://localhost:8103/internal/skills "HTTP/1.1 200 OK"
+2026-04-13 10:24:17,797 - httpx - INFO - HTTP Request: POST http://localhost:8103/internal/skills/execute/parse_requirements "HTTP/1.1 422 Unprocessable Content"
+2026-04-13 10:24:36,562 - httpx - INFO - HTTP Request: POST http://localhost:8103/internal/skills/execute/parse_requirements "HTTP/1.1 200 OK"
