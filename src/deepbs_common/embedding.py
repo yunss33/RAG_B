@@ -1,41 +1,45 @@
 from __future__ import annotations
 
 from typing import List, Optional
+import os
 import hashlib
+
+from langchain_community.embeddings import DashScopeEmbeddings
 
 
 class EmbeddingManager:
-    """Embedding模型管理器"""
+    """Embedding模型管理器，使用langchain和阿里百炼的嵌入模型"""
     
-    def __init__(self, model_name: str = "paraphrase-multilingual-MiniLM-L12-v2", use_local: bool = True):
+    def __init__(self, model_name: str = "text-embedding-v3", api_key: Optional[str] = None):
         """
         初始化Embedding管理器
         
         Args:
-            model_name: 使用的模型名称
-            use_local: 是否使用本地模式（用于测试，无需下载模型）
+            model_name: 使用的模型名称，默认为qwen3-vl-embedding
+            api_key: 阿里百炼的API密钥，如果为None则从环境变量DASHSCOPE_API_KEY读取
         """
         self.model_name = model_name
-        self.use_local = use_local
-        self.model = None
-        self.vector_size = 768  # MiniLM模型的向量维度
+        self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY", "sk-e0a3c05a49d444d79967e67cc5d1a2a9")
+        self.embeddings = None
+        self.vector_size = 1024  # qwen3-vl-embedding的向量维度
     
     def initialize(self):
         """
         初始化Embedding模型
         """
-        if not self.use_local:
+        if self.embeddings is None:
             try:
-                from sentence_transformers import SentenceTransformer
-                if self.model is None:
-                    self.model = SentenceTransformer(self.model_name)
-                    # 获取实际向量维度
-                    test_embedding = self.model.encode("test", convert_to_tensor=False)
-                    self.vector_size = len(test_embedding)
+                self.embeddings = DashScopeEmbeddings(
+                    model=self.model_name,
+                    dashscope_api_key=self.api_key
+                )
+                # 获取实际向量维度
+                test_embedding = self.embeddings.embed_query("test")
+                self.vector_size = len(test_embedding)
             except Exception as e:
-                print(f"Warning: Failed to load SentenceTransformer model: {e}")
+                print(f"Warning: Failed to initialize DashScopeEmbeddings: {e}")
                 print("Using local mock embedding instead")
-                self.use_local = True
+                self.embeddings = None
         return self
     
     def get_embedding(self, text: str) -> List[float]:
@@ -50,12 +54,16 @@ class EmbeddingManager:
         """
         self.initialize()
         
-        if not self.use_local and self.model:
-            embedding = self.model.encode(text, convert_to_tensor=False)
-            return embedding.tolist()
-        else:
-            # 本地模拟Embedding：使用哈希值生成固定长度的向量
-            return self._mock_embedding(text)
+        if self.embeddings:
+            try:
+                embedding = self.embeddings.embed_query(text)
+                return embedding
+            except Exception as e:
+                print(f"Warning: Failed to get embedding from DashScope: {e}")
+                print("Falling back to mock embedding")
+        
+        # 本地模拟Embedding：使用哈希值生成固定长度的向量
+        return self._mock_embedding(text)
     
     def get_embeddings(self, texts: List[str]) -> List[List[float]]:
         """
@@ -69,12 +77,16 @@ class EmbeddingManager:
         """
         self.initialize()
         
-        if not self.use_local and self.model:
-            embeddings = self.model.encode(texts, convert_to_tensor=False)
-            return embeddings.tolist()
-        else:
-            # 本地模拟Embedding
-            return [self._mock_embedding(text) for text in texts]
+        if self.embeddings:
+            try:
+                embeddings = self.embeddings.embed_documents(texts)
+                return embeddings
+            except Exception as e:
+                print(f"Warning: Failed to get embeddings from DashScope: {e}")
+                print("Falling back to mock embedding")
+        
+        # 本地模拟Embedding
+        return [self._mock_embedding(text) for text in texts]
     
     def get_vector_size(self) -> int:
         """

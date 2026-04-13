@@ -22,7 +22,7 @@ class QdrantManager:
             self.initialize()
         return self.client
     
-    def create_collection(self, collection_name: str = None, vector_size: int = 768):
+    def create_collection(self, collection_name: str = None, vector_size: int = 1024):
         """创建向量集合"""
         collection_name = collection_name or settings.qdrant_collection_name
         client = self.get_client()
