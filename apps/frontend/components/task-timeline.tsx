@@ -28,11 +28,11 @@ interface TaskTimelineProps {
   selectedLog?: any;
 }
 
-const STATUS_COLORS = {
-  pending: 'border-gray-300 bg-gray-100',
-  running: 'border-yellow-400 bg-yellow-50',
-  completed: 'border-green-500 bg-green-50',
-  failed: 'border-red-500 bg-red-50',
+const STATUS_STYLES: Record<string, React.CSSProperties> = {
+  pending: { borderColor: '#d1d5db', backgroundColor: '#f3f4f6' },
+  running: { borderColor: '#facc15', backgroundColor: '#fefce8' },
+  completed: { borderColor: '#22c55e', backgroundColor: '#f0fdf4' },
+  failed: { borderColor: '#ef4444', backgroundColor: '#fef2f2' },
 };
 
 const STATUS_LABELS = {
@@ -42,11 +42,11 @@ const STATUS_LABELS = {
   failed: '失败',
 };
 
-const STATUS_DOTS = {
-  pending: 'bg-gray-300',
-  running: 'bg-yellow-400 animate-pulse',
-  completed: 'bg-green-500',
-  failed: 'bg-red-500',
+const STATUS_DOT_STYLES: Record<string, React.CSSProperties> = {
+  pending: { backgroundColor: '#d1d5db' },
+  running: { backgroundColor: '#facc15', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' },
+  completed: { backgroundColor: '#22c55e' },
+  failed: { backgroundColor: '#ef4444' },
 };
 
 export function TaskTimeline({
@@ -63,7 +63,6 @@ export function TaskTimeline({
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
   const timelineRef = useRef<HTMLDivElement>(null);
 
-  // 处理任务点击，切换展开/收起状态
   const handleTaskClick = (task: Task) => {
     if (expandedTaskId === task.id) {
       setExpandedTaskId(null);
@@ -73,7 +72,6 @@ export function TaskTimeline({
     onTaskClick?.(task);
   };
 
-  // 当选中任务变化时，滚动到该任务
   useEffect(() => {
     if (selectedTaskId && timelineRef.current) {
       const selectedElement = document.getElementById(`task-${selectedTaskId}`);
@@ -83,7 +81,6 @@ export function TaskTimeline({
     }
   }, [selectedTaskId]);
 
-  // 计算任务执行时间
   const getExecutionTime = (task: Task) => {
     if (!task.timestamp || !task.endTimestamp) return null;
     const start = new Date(task.timestamp);
@@ -95,11 +92,16 @@ export function TaskTimeline({
 
   return (
     <div className="panel">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-        <h2 className="text-xl font-semibold mb-3 md:mb-0">任务时间线</h2>
-        <div className="flex items-center gap-3">
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column',
+        gap: '16px',
+        marginBottom: '24px'
+      }}>
+        <h2>任务时间线</h2>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
           {onTaskJump && (
-            <div className="flex items-center gap-2">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <button
                 className="button secondary"
                 onClick={() => onTaskJump(tasks[0]?.id)}
@@ -175,64 +177,103 @@ export function TaskTimeline({
           )}
         </div>
       </div>
-      <div className="relative" ref={timelineRef}>
-        <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
-        <div className="space-y-4">
+      <div style={{ position: 'relative' }} ref={timelineRef}>
+        <div style={{ 
+          position: 'absolute', 
+          left: '16px', 
+          top: 0, 
+          bottom: 0, 
+          width: '2px', 
+          backgroundColor: '#e5e7eb'
+        }} />
+        <div style={{ display: 'grid', gap: '16px' }}>
           {tasks.map((task, index) => {
             const isSelected = selectedTaskId === task.id;
             const isExpanded = expandedTaskId === task.id;
             const executionTime = getExecutionTime(task);
             
-            // 找到当前任务的日志
             const taskLog = selectedLog?.id === task.logId ? selectedLog : null;
             
             return (
               <div
                 key={task.id}
                 id={`task-${task.id}`}
-                className={`relative pl-12 transition-all ${isSelected ? 'opacity-100' : 'opacity-80'}`}
+                style={{ 
+                  position: 'relative', 
+                  paddingLeft: '48px', 
+                  transition: 'var(--transition)',
+                  opacity: isSelected ? 1 : 0.8
+                }}
               >
                 <div 
-                  className={`absolute left-2 top-2 w-4 h-4 rounded-full border-2 border-white shadow-sm ${STATUS_DOTS[task.status as keyof typeof STATUS_DOTS]}`} 
+                  style={{
+                    position: 'absolute',
+                    left: '8px',
+                    top: '8px',
+                    width: '16px',
+                    height: '16px',
+                    borderRadius: '9999px',
+                    border: '2px solid white',
+                    boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+                    ...STATUS_DOT_STYLES[task.status as keyof typeof STATUS_DOT_STYLES]
+                  }}
                 />
                 <div
-                  className={`card border-2 ${STATUS_COLORS[task.status as keyof typeof STATUS_COLORS]} ${isSelected ? 'ring-2 ring-orange-500' : ''} cursor-pointer`}
+                  className="card"
                   onClick={() => handleTaskClick(task)}
                   style={{ 
                     margin: 0,
-                    transition: 'all 0.2s ease',
+                    border: `2px solid`,
+                    ...STATUS_STYLES[task.status as keyof typeof STATUS_STYLES],
+                    cursor: 'pointer',
+                    boxShadow: isSelected ? '0 0 0 2px #f97316' : 'none',
                     transform: isSelected ? 'translateX(4px)' : 'none'
                   }}
                 >
-                  <div className="flex flex-col md:flex-row md:items-start md:justify-between">
-                    <div className="mb-2 md:mb-0">
-                      <div className="font-semibold text-base">{task.name}</div>
-                      <div className="text-sm text-gray-600 mt-1">
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                    <div>
+                      <div style={{ fontWeight: 600, fontSize: '16px' }}>{task.name}</div>
+                      <div style={{ fontSize: '14px', color: 'var(--muted)', marginTop: '4px' }}>
                         执行: {task.agent}
                       </div>
                     </div>
-                    <div className="text-right">
-                      <div className="text-sm text-gray-500">{task.timestamp}</div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: '14px', color: 'var(--muted)' }}>{task.timestamp}</div>
                       {executionTime && (
-                        <div className="text-sm text-gray-500 mt-1">执行时间: {executionTime}</div>
+                        <div style={{ fontSize: '14px', color: 'var(--muted)', marginTop: '4px' }}>
+                          执行时间: {executionTime}
+                        </div>
                       )}
-                      <span className="pill mt-2">{STATUS_LABELS[task.status as keyof typeof STATUS_LABELS]}</span>
+                      <span className="pill" style={{ marginTop: '8px', display: 'inline-block' }}>
+                        {STATUS_LABELS[task.status as keyof typeof STATUS_LABELS]}
+                      </span>
                     </div>
                   </div>
                 </div>
                 
-                {/* 展开的详细日志 */}
                 {isExpanded && taskLog && (
-                  <div className="mt-2 ml-4 pl-8 border-l-2 border-gray-200">
-                    <div className="card bg-gray-50">
-                      <h4 className="font-semibold mb-3">执行详情</h4>
+                  <div style={{ 
+                    marginTop: '8px', 
+                    marginLeft: '16px', 
+                    paddingLeft: '32px', 
+                    borderLeft: '2px solid #e5e7eb'
+                  }}>
+                    <div className="card" style={{ margin: 0, backgroundColor: 'var(--panel-alt)' }}>
+                      <h4 style={{ fontWeight: 600, marginBottom: '12px' }}>执行详情</h4>
                       
                       {taskLog.thought_chain && taskLog.thought_chain.length > 0 && (
-                        <div className="mb-4">
-                          <h5 className="text-sm font-medium text-gray-700 mb-2">思考过程</h5>
-                          <div className="space-y-2 text-sm">
+                        <div style={{ marginBottom: '16px' }}>
+                          <h5 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink)', marginBottom: '8px' }}>
+                            思考过程
+                          </h5>
+                          <div style={{ display: 'grid', gap: '8px', fontSize: '14px' }}>
                             {taskLog.thought_chain.map((thought: string, i: number) => (
-                              <div key={i} className="bg-white p-2 rounded-lg border border-gray-100">
+                              <div key={i} style={{ 
+                                backgroundColor: 'white', 
+                                padding: '8px', 
+                                borderRadius: 'var(--border-radius)', 
+                                border: '1px solid var(--line)'
+                              }}>
                                 {thought}
                               </div>
                             ))}
@@ -241,12 +282,19 @@ export function TaskTimeline({
                       )}
                       
                       {taskLog.intermediate_outputs && taskLog.intermediate_outputs.length > 0 && (
-                        <div className="mb-4">
-                          <h5 className="text-sm font-medium text-gray-700 mb-2">中间输出</h5>
-                          <div className="space-y-2 text-sm">
+                        <div style={{ marginBottom: '16px' }}>
+                          <h5 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink)', marginBottom: '8px' }}>
+                            中间输出
+                          </h5>
+                          <div style={{ display: 'grid', gap: '8px', fontSize: '14px' }}>
                             {taskLog.intermediate_outputs.map((output: any, i: number) => (
-                              <div key={i} className="bg-white p-2 rounded-lg border border-gray-100">
-                                <pre className="whitespace-pre-wrap break-words">
+                              <div key={i} style={{ 
+                                backgroundColor: 'white', 
+                                padding: '8px', 
+                                borderRadius: 'var(--border-radius)', 
+                                border: '1px solid var(--line)'
+                              }}>
+                                <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
                                   {JSON.stringify(output, null, 2)}
                                 </pre>
                               </div>
@@ -256,10 +304,18 @@ export function TaskTimeline({
                       )}
                       
                       {taskLog.final_output && (
-                        <div className="mb-4">
-                          <h5 className="text-sm font-medium text-gray-700 mb-2">最终输出</h5>
-                          <div className="bg-white p-2 rounded-lg border border-gray-100 text-sm">
-                            <pre className="whitespace-pre-wrap break-words">
+                        <div style={{ marginBottom: '16px' }}>
+                          <h5 style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink)', marginBottom: '8px' }}>
+                            最终输出
+                          </h5>
+                          <div style={{ 
+                            backgroundColor: 'white', 
+                            padding: '8px', 
+                            borderRadius: 'var(--border-radius)', 
+                            border: '1px solid var(--line)',
+                            fontSize: '14px'
+                          }}>
+                            <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', margin: 0 }}>
                               {JSON.stringify(taskLog.final_output, null, 2)}
                             </pre>
                           </div>
@@ -267,9 +323,18 @@ export function TaskTimeline({
                       )}
                       
                       {taskLog.error_message && (
-                        <div className="mb-4">
-                          <h5 className="text-sm font-medium text-red-700 mb-2">错误信息</h5>
-                          <div className="bg-red-50 p-2 rounded-lg border border-red-200 text-sm text-red-700">
+                        <div style={{ marginBottom: '16px' }}>
+                          <h5 style={{ fontSize: '14px', fontWeight: 500, color: '#991b1b', marginBottom: '8px' }}>
+                            错误信息
+                          </h5>
+                          <div style={{ 
+                            backgroundColor: '#fef2f2', 
+                            padding: '8px', 
+                            borderRadius: 'var(--border-radius)', 
+                            border: '1px solid #fca5a5',
+                            fontSize: '14px',
+                            color: '#991b1b'
+                          }}>
                             {taskLog.error_message}
                           </div>
                         </div>

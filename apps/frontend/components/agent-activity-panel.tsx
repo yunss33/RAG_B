@@ -28,11 +28,11 @@ const AGENT_INFO = {
   assembler: { name: '成稿装配师', icon: '📦' },
 };
 
-const STATUS_COLORS = {
-  idle: 'bg-gray-200',
-  running: 'bg-yellow-400 animate-pulse',
-  completed: 'bg-green-500',
-  failed: 'bg-red-500',
+const STATUS_COLORS: Record<string, React.CSSProperties> = {
+  idle: { backgroundColor: '#e5e7eb' },
+  running: { backgroundColor: '#facc15', animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite' },
+  completed: { backgroundColor: '#22c55e' },
+  failed: { backgroundColor: '#ef4444' },
 };
 
 const STATUS_LABELS = {
@@ -68,56 +68,79 @@ export function AgentActivityPanel({ agents, onAgentClick, selectedAgentId }: Ag
           return (
             <div
               key={agent.id}
-              className={`card cursor-pointer transition-all ${isSelected ? 'ring-2 ring-orange-500' : ''} hover:shadow-sm`}
-              style={{ margin: 0, border: '1px solid var(--line)', borderRadius: '18px' }}
+              className="card"
+              style={{ 
+                margin: 0, 
+                border: isSelected ? '2px solid #f97316' : '1px solid var(--line)', 
+                borderRadius: '18px',
+                cursor: 'pointer',
+                transition: 'var(--transition)'
+              }}
             >
               <div 
-                className="flex items-center justify-between p-4"
+                style={{ 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'space-between', 
+                  padding: '16px'
+                }}
                 onClick={() => {
                   toggleExpand(agent.id);
                   onAgentClick?.(agent);
                 }}
               >
-                <div className="flex items-center gap-3">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <span style={{ fontSize: '24px' }}>{info.icon}</span>
-                  <div className="flex-1">
-                    <div className="font-semibold text-base">{info.name}</div>
-                    <div className="flex items-center gap-2 mt-1">
-                      {agent.section && <span className="text-xs text-gray-600">{agent.section}</span>}
-                      {agent.perspective && <span className="text-xs text-gray-600">{agent.perspective}视角</span>}
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: '16px' }}>{info.name}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '4px' }}>
+                      {agent.section && <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{agent.section}</span>}
+                      {agent.perspective && <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{agent.perspective}视角</span>}
                       {agent.timestamp && (
-                        <span className="text-xs text-gray-500">
+                        <span style={{ fontSize: '12px', color: 'var(--muted)' }}>
                           {new Date(agent.timestamp).toLocaleTimeString()}
                         </span>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-2">
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                     <div
-                      className={`w-3 h-3 rounded-full ${STATUS_COLORS[agent.status as keyof typeof STATUS_COLORS]}`}
+                      style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '9999px',
+                        ...STATUS_COLORS[agent.status as keyof typeof STATUS_COLORS]
+                      }}
                     />
-                    <span className="text-sm text-gray-600 flex items-center gap-1">
+                    <span style={{ fontSize: '14px', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '4px' }}>
                       {STATUS_ICONS[agent.status as keyof typeof STATUS_ICONS]}
                       {STATUS_LABELS[agent.status as keyof typeof STATUS_LABELS]}
                     </span>
                   </div>
-                  <div className="text-gray-500">
+                  <div style={{ color: 'var(--muted)' }}>
                     {isExpanded ? '▼' : '▶'}
                   </div>
                 </div>
               </div>
               
               {isExpanded && agent.thoughts && agent.thoughts.length > 0 && (
-                <div className="px-4 pb-4 border-t border-gray-200">
-                  <div className="mt-3">
-                    <div className="text-sm font-semibold mb-2">思考过程</div>
-                    <div className="bg-gray-50 rounded-lg p-3">
+                <div style={{ 
+                  padding: '0 16px 16px', 
+                  borderTop: '1px solid var(--line)'
+                }}>
+                  <div style={{ marginTop: '12px' }}>
+                    <div style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px' }}>思考过程</div>
+                    <div style={{ 
+                      backgroundColor: 'var(--panel-alt)', 
+                      borderRadius: 'var(--border-radius)', 
+                      padding: '12px'
+                    }}>
                       {agent.thoughts.map((thought, index) => (
-                        <div key={index} className="mb-2 last:mb-0">
-                          <div className="text-xs text-gray-500 mb-1">思考 {index + 1}</div>
-                          <div className="text-sm">{thought}</div>
+                        <div key={index} style={{ marginBottom: '8px' }}>
+                          <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '4px' }}>思考 {index + 1}</div>
+                          <div style={{ fontSize: '14px' }}>{thought}</div>
                         </div>
                       ))}
                     </div>

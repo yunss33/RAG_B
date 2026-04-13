@@ -19,10 +19,7 @@ export function MessagePanel({ projectId }: MessagePanelProps) {
   const [messages, setMessages] = useState<Message[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  // 模拟实时消息获取
   useEffect(() => {
-    // 这里应该是从后端获取实时消息的逻辑
-    // 暂时使用模拟数据
     const mockMessages: Message[] = [
       {
         id: '1',
@@ -66,7 +63,6 @@ export function MessagePanel({ projectId }: MessagePanelProps) {
       }
     ];
 
-    // 模拟消息流
     let i = 0;
     const interval = setInterval(() => {
       if (i < mockMessages.length) {
@@ -80,12 +76,10 @@ export function MessagePanel({ projectId }: MessagePanelProps) {
     return () => clearInterval(interval);
   }, [projectId]);
 
-  // 自动滚动到底部
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // 格式化时间
   const formatTime = (time: string) => {
     try {
       const date = new Date(time);
@@ -99,7 +93,6 @@ export function MessagePanel({ projectId }: MessagePanelProps) {
     }
   };
 
-  // 获取智能体名称
   const getAgentName = (role: string) => {
     const agentNames: Record<string, string> = {
       parser: '招标文件解析专家',
@@ -111,13 +104,12 @@ export function MessagePanel({ projectId }: MessagePanelProps) {
     return agentNames[role] || role;
   };
 
-  // 获取消息类型样式
   const getMessageTypeStyles = (type: Message['type']) => {
-    const styles = {
-      info: 'bg-blue-50 border-blue-200 text-blue-800',
-      warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
-      error: 'bg-red-50 border-red-200 text-red-800',
-      success: 'bg-green-50 border-green-200 text-green-800'
+    const styles: Record<string, React.CSSProperties> = {
+      info: { backgroundColor: 'var(--accent-light)', borderColor: '#bfdbfe', color: '#1d4ed8' },
+      warning: { backgroundColor: '#fefce8', borderColor: '#facc15', color: '#854d0e' },
+      error: { backgroundColor: '#fef2f2', borderColor: '#fca5a5', color: '#991b1b' },
+      success: { backgroundColor: '#f0fdf4', borderColor: '#86efac', color: '#166534' }
     };
     return styles[type];
   };
@@ -125,27 +117,43 @@ export function MessagePanel({ projectId }: MessagePanelProps) {
   return (
     <div className="panel">
       <h2>实时消息</h2>
-      <div className="bg-gray-50 rounded-lg p-4 h-[calc(100vh-200px)] overflow-y-auto">
-        <div className="space-y-4">
+      <div style={{ 
+        backgroundColor: 'var(--panel-alt)', 
+        borderRadius: 'var(--border-radius)', 
+        padding: '16px', 
+        height: 'calc(100vh - 200px)', 
+        overflowY: 'auto'
+      }}>
+        <div style={{ display: 'grid', gap: '16px' }}>
           {messages.length > 0 ? (
             messages.map((message) => (
               <div 
                 key={message.id} 
-                className={`p-3 rounded-lg border ${getMessageTypeStyles(message.type)}`}
+                style={{
+                  padding: '12px',
+                  borderRadius: 'var(--border-radius)',
+                  border: '1px solid',
+                  ...getMessageTypeStyles(message.type)
+                }}
               >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold">{getAgentName(message.sender)}</span>
-                    <span className="text-gray-500">→</span>
-                    <span className="font-medium">{getAgentName(message.receiver)}</span>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'flex-start', 
+                  marginBottom: '8px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ fontWeight: 600 }}>{getAgentName(message.sender)}</span>
+                    <span style={{ color: 'var(--muted)' }}>→</span>
+                    <span style={{ fontWeight: 500 }}>{getAgentName(message.receiver)}</span>
                   </div>
-                  <span className="text-xs text-gray-500">{formatTime(message.timestamp)}</span>
+                  <span style={{ fontSize: '12px', color: 'var(--muted)' }}>{formatTime(message.timestamp)}</span>
                 </div>
-                <div className="text-sm">{message.content}</div>
+                <div style={{ fontSize: '14px' }}>{message.content}</div>
               </div>
             ))
           ) : (
-            <div className="text-center text-gray-500 py-8">
+            <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '32px 0' }}>
               暂无消息
             </div>
           )}

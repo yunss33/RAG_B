@@ -26,7 +26,6 @@ export function ThoughtProcess({
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
-  // 计算总持续时间
   const calculateTotalDuration = () => {
     if (durations && durations.length > 0) {
       return durations.reduce((total, duration) => total + duration, 0);
@@ -39,7 +38,6 @@ export function ThoughtProcess({
     return 0;
   };
 
-  // 格式化时间
   const formatTime = (time: string) => {
     try {
       const date = new Date(time);
@@ -55,7 +53,6 @@ export function ThoughtProcess({
     }
   };
 
-  // 格式化持续时间
   const formatDuration = (seconds: number) => {
     if (seconds < 1) return '< 1s';
     if (seconds < 60) return `${Math.round(seconds)}s`;
@@ -64,7 +61,6 @@ export function ThoughtProcess({
     return `${minutes}m ${remainingSeconds}s`;
   };
 
-  // 切换展开/折叠状态
   const toggleExpand = (index: number) => {
     setIsAnimating(true);
     setExpandedIndex(expandedIndex === index ? null : index);
@@ -73,12 +69,20 @@ export function ThoughtProcess({
 
   return (
     <div className="panel">
-      <div className="flex justify-between items-center mb-4">
+      <div style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        marginBottom: '16px'
+      }}>
         <h2>思考过程</h2>
         {(start_time || end_time) && (
-          <div className="text-sm text-gray-600">
+          <div style={{ fontSize: '14px', color: 'var(--muted)' }}>
             {calculateTotalDuration() > 0 && (
-              <span className="pill bg-orange-50 border-orange-200">
+              <span className="pill" style={{ 
+                backgroundColor: '#fff7ed', 
+                border: '1px solid #fed7aa' 
+              }}>
                 总耗时: {formatDuration(calculateTotalDuration())}
               </span>
             )}
@@ -89,7 +93,7 @@ export function ThoughtProcess({
       <div className="stack" style={{ gap: '16px' }}>
         {(start_time || end_time) && (
           <div className="card" style={{ margin: 0 }}>
-            <div className="text-sm text-gray-600">
+            <div style={{ fontSize: '14px', color: 'var(--muted)' }}>
               {start_time && <div>开始时间: {formatTime(start_time)}</div>}
               {end_time && <div>结束时间: {formatTime(end_time)}</div>}
             </div>
@@ -98,8 +102,15 @@ export function ThoughtProcess({
 
         {inputData && (
           <div className="card" style={{ margin: 0 }}>
-            <h3 className="font-semibold mb-2">📥 输入数据</h3>
-            <pre className="text-sm bg-gray-50 p-3 rounded-lg overflow-x-auto">
+            <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>📥 输入数据</h3>
+            <pre style={{ 
+              fontSize: '14px', 
+              backgroundColor: 'var(--panel-alt)', 
+              padding: '12px', 
+              borderRadius: 'var(--border-radius)', 
+              overflowX: 'auto',
+              margin: 0
+            }}>
               {JSON.stringify(inputData, null, 2)}
             </pre>
           </div>
@@ -107,37 +118,86 @@ export function ThoughtProcess({
 
         {thoughtChain.length > 0 && (
           <div className="card" style={{ margin: 0 }}>
-            <h3 className="font-semibold mb-3">🧠 思考链</h3>
-            <div className="relative">
-              <div className="absolute left-4 top-0 bottom-0 w-0.5 bg-gray-200" />
+            <h3 style={{ fontWeight: 600, marginBottom: '12px' }}>🧠 思考链</h3>
+            <div style={{ position: 'relative' }}>
+              <div style={{ 
+                position: 'absolute', 
+                left: '16px', 
+                top: 0, 
+                bottom: 0, 
+                width: '2px', 
+                backgroundColor: '#e5e7eb'
+              }} />
               <div className="stack" style={{ gap: '16px' }}>
                 {thoughtChain.map((thought, index) => (
-                  <div key={index} className="relative pl-12">
+                  <div key={index} style={{ position: 'relative', paddingLeft: '48px' }}>
                     <div 
-                      className={`absolute left-2 top-2 w-4 h-4 rounded-full border-2 border-white shadow-sm transition-all ${expandedIndex === index ? 'bg-accent scale-110' : 'bg-orange-500'}`}
+                      style={{
+                        position: 'absolute',
+                        left: '8px',
+                        top: '8px',
+                        width: '16px',
+                        height: '16px',
+                        borderRadius: '9999px',
+                        border: '2px solid white',
+                        boxShadow: '0 1px 2px 0 rgb(0 0 0 / 0.05)',
+                        transition: 'var(--transition)',
+                        backgroundColor: expandedIndex === index ? 'var(--accent)' : '#f97316',
+                        transform: expandedIndex === index ? 'scale(1.1)' : 'scale(1)'
+                      }}
                     />
                     <div 
-                      className={`bg-orange-50 p-4 rounded-lg border border-orange-200 transition-all cursor-pointer ${isAnimating ? 'transition-all duration-300' : ''}`}
+                      style={{
+                        backgroundColor: '#fff7ed',
+                        padding: '16px',
+                        borderRadius: 'var(--border-radius)',
+                        border: '1px solid #fed7aa',
+                        transition: 'var(--transition)',
+                        cursor: 'pointer'
+                      }}
                       onClick={() => toggleExpand(index)}
                     >
-                      <div className="flex justify-between items-start mb-2">
-                        <div className="font-semibold text-sm">思考 {index + 1}</div>
-                        <div className="text-xs text-gray-500 flex items-center gap-2">
+                      <div style={{ 
+                        display: 'flex', 
+                        justifyContent: 'space-between', 
+                        alignItems: 'flex-start', 
+                        marginBottom: '8px'
+                      }}>
+                        <div style={{ fontWeight: 600, fontSize: '14px' }}>思考 {index + 1}</div>
+                        <div style={{ fontSize: '12px', color: 'var(--muted)', display: 'flex', alignItems: 'center', gap: '8px' }}>
                           {timestamps && timestamps[index] && (
                             <span>{formatTime(timestamps[index])}</span>
                           )}
                           {durations && durations[index] && (
-                            <span className="bg-gray-100 px-2 py-0.5 rounded">
+                            <span style={{ 
+                              backgroundColor: '#f3f4f6', 
+                              paddingLeft: '8px', 
+                              paddingRight: '8px', 
+                              paddingTop: '2px', 
+                              paddingBottom: '2px',
+                              borderRadius: '4px'
+                            }}>
                               {formatDuration(durations[index])}
                             </span>
                           )}
                         </div>
                       </div>
-                      <div className={`transition-all duration-300 ${expandedIndex === index ? 'max-h-96 opacity-100' : 'max-h-16 opacity-90 overflow-hidden'}`}>
+                      <div style={{ 
+                        transition: 'var(--transition)',
+                        maxHeight: expandedIndex === index ? '9999px' : '64px',
+                        opacity: expandedIndex === index ? 1 : 0.9,
+                        overflow: expandedIndex === index ? 'visible' : 'hidden'
+                      }}>
                         {thought}
                       </div>
-                      <div className="mt-2 text-right">
-                        <span className={`text-xs text-gray-500 transition-transform ${expandedIndex === index ? 'rotate-180' : ''}`}>
+                      <div style={{ marginTop: '8px', textAlign: 'right' }}>
+                        <span style={{ 
+                          fontSize: '12px', 
+                          color: 'var(--muted)', 
+                          transition: 'transform 0.3s',
+                          display: 'inline-block',
+                          transform: expandedIndex === index ? 'rotate(180deg)' : 'rotate(0deg)'
+                        }}>
                           ▲
                         </span>
                       </div>
@@ -151,12 +211,19 @@ export function ThoughtProcess({
 
         {intermediateOutputs && intermediateOutputs.length > 0 && (
           <div className="card" style={{ margin: 0 }}>
-            <h3 className="font-semibold mb-3">📝 中间结果</h3>
+            <h3 style={{ fontWeight: 600, marginBottom: '12px' }}>📝 中间结果</h3>
             <div className="stack" style={{ gap: '12px' }}>
               {intermediateOutputs.map((output, index) => (
-                <div key={index} className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-                  <div className="text-sm font-semibold text-blue-700 mb-2">步骤 {index + 1}</div>
-                  <pre className="text-sm overflow-x-auto">
+                <div key={index} style={{ 
+                  backgroundColor: '#eff6ff', 
+                  padding: '12px', 
+                  borderRadius: 'var(--border-radius)', 
+                  border: '1px solid #bfdbfe'
+                }}>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: '#1d4ed8', marginBottom: '8px' }}>
+                    步骤 {index + 1}
+                  </div>
+                  <pre style={{ fontSize: '14px', overflowX: 'auto', margin: 0 }}>
                     {JSON.stringify(output, null, 2)}
                   </pre>
                 </div>
@@ -167,15 +234,23 @@ export function ThoughtProcess({
 
         {finalOutput && (
           <div className="card" style={{ margin: 0 }}>
-            <h3 className="font-semibold mb-2">📤 最终输出</h3>
-            <pre className="text-sm bg-green-50 p-3 rounded-lg overflow-x-auto border border-green-200">
+            <h3 style={{ fontWeight: 600, marginBottom: '8px' }}>📤 最终输出</h3>
+            <pre style={{ 
+              fontSize: '14px', 
+              backgroundColor: '#f0fdf4', 
+              padding: '12px', 
+              borderRadius: 'var(--border-radius)', 
+              overflowX: 'auto', 
+              border: '1px solid #86efac',
+              margin: 0
+            }}>
               {JSON.stringify(finalOutput, null, 2)}
             </pre>
           </div>
         )}
 
         {thoughtChain.length === 0 && !inputData && !intermediateOutputs && !finalOutput && (
-          <div className="text-center text-gray-500 py-8">
+          <div style={{ textAlign: 'center', color: 'var(--muted)', padding: '32px 0' }}>
             暂无思考过程记录
           </div>
         )}
