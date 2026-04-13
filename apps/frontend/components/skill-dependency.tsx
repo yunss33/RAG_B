@@ -1,12 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import {
-  Sankey,
-  SankeyNode,
-  SankeyLink,
-  ResponsiveContainer
-} from 'recharts';
 
 interface SkillDependency {
   source: string;
@@ -38,7 +32,6 @@ export const SkillDependency = React.memo(function SkillDependency({ dependencie
   const [selectedNode, setSelectedNode] = useState<string | null>(null);
 
   useEffect(() => {
-    // 模拟数据加载
     const timer = setTimeout(() => {
       setLoading(false);
     }, 500);
@@ -62,45 +55,76 @@ export const SkillDependency = React.memo(function SkillDependency({ dependencie
     );
   }
 
+  const getNodeDeps = (nodeName: string) => {
+    const outputs = dependencies.filter(d => d.source === nodeName);
+    const inputs = dependencies.filter(d => d.target === nodeName);
+    return { outputs, inputs };
+  };
+
   return (
     <div className="panel">
       <h2>技能依赖关系</h2>
       
-      <div style={{ height: '400px', marginBottom: '24px' }}>
-        <ResponsiveContainer width="100%" height="100%">
-          <Sankey
-            data={{
-              nodes: nodes.map(node => ({
-                name: node.name,
-                icon: node.icon,
-                category: node.category
-              })),
-              links: dependencies
-            }}
-            margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-          >
-            <SankeyNode
-              fill={(node) => COLORS[node.category as keyof typeof COLORS] || '#ccc'}
-              stroke="#000"
-              width={150}
-              nodePadding={10}
-              label={({ name, icon }) => (
-                <g>
-                  <text x={-70} y={5} textAnchor="middle" fill="#000" fontSize={14} fontWeight={600}>
-                    {icon} {name}
-                  </text>
-                </g>
-              )}
-              onNodeClick={(node) => setSelectedNode(node.name)}
-            />
-            <SankeyLink
-              stroke="#999"
-              strokeOpacity={0.6}
-              strokeWidth={(link) => Math.sqrt(link.value)}
-              onLinkClick={(link) => console.log('Link clicked:', link)}
-            />
-          </Sankey>
-        </ResponsiveContainer>
+      <div style={{ 
+        display: 'grid', 
+        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', 
+        gap: '16px',
+        marginBottom: '24px'
+      }}>
+        {nodes.map((node) => {
+          const deps = getNodeDeps(node.name);
+          const isSelected = selectedNode === node.name;
+          
+          return (
+            <div
+              key={node.name}
+              className="card"
+              style={{
+                padding: '16px',
+                borderRadius: '12px',
+                border: isSelected ? '2px solid var(--accent)' : '1px solid var(--line)',
+                backgroundColor: 'white',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer'
+              }}
+              onClick={() => setSelectedNode(isSelected ? null : node.name)}
+              onMouseEnter={(e) => {
+                if (!isSelected) {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSelected) {
+                  e.currentTarget.style.transform = 'none';
+                  e.currentTarget.style.boxShadow = 'none';
+                }
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '12px' }}>
+                <span style={{ fontSize: '24px' }}>{node.icon}</span>
+                <div style={{ 
+                  fontWeight: 600, 
+                  fontSize: '16px',
+                  color: COLORS[node.category as keyof typeof COLORS] || 'var(--ink)'
+                }}>
+                  {node.name}
+                </div>
+              </div>
+              
+              <div style={{ display: 'flex', gap: '16px', fontSize: '14px' }}>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '4px' }}>输出依赖</div>
+                  <div style={{ fontWeight: 600 }}>{deps.outputs.length}</div>
+                </div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '12px', color: 'var(--muted)', marginBottom: '4px' }}>输入依赖</div>
+                  <div style={{ fontWeight: 600 }}>{deps.inputs.length}</div>
+                </div>
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {selectedNode && (
@@ -111,10 +135,57 @@ export const SkillDependency = React.memo(function SkillDependency({ dependencie
           backgroundColor: 'white',
           animation: 'fadeIn 0.3s ease-in-out'
         }}>
-          <h3 style={{ marginBottom: '12px' }}>技能详情</h3>
-          <p>技能名称: <strong>{selectedNode}</strong></p>
-          <p>依赖关系: {dependencies.filter(d => d.source === selectedNode).length} 个输出依赖</p>
-          <p>被依赖关系: {dependencies.filter(d => d.target === selectedNode).length} 个输入依赖</p>
+          <h3 style={{ marginBottom: '12px' }}>技能详情: {selectedNode}</h3>
+          
+          {(() => {
+            const deps = getNodeDeps(selectedNode);
+            
+            return (
+              <>
+                {deps.outputs.length > 0 && (
+                  <div style={{ marginBottom: '16px' }}>
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: 'var(--muted)' }}>
+                      输出到以下技能
+                    </h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {deps.outputs.map((dep, i) => (
+                        <span key={i} style={{
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          backgroundColor: 'var(--panel-alt)',
+                          fontSize: '13px',
+                          fontWeight: 500
+                        }}>
+                          {dep.target}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {deps.inputs.length > 0 && (
+                  <div>
+                    <h4 style={{ fontSize: '14px', fontWeight: 600, marginBottom: '8px', color: 'var(--muted)' }}>
+                      来自以下技能的输入
+                    </h4>
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                      {deps.inputs.map((dep, i) => (
+                        <span key={i} style={{
+                          padding: '4px 12px',
+                          borderRadius: '12px',
+                          backgroundColor: 'var(--panel-alt)',
+                          fontSize: '13px',
+                          fontWeight: 500
+                        }}>
+                          {dep.source}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </>
+            );
+          })()}
         </div>
       )}
 
