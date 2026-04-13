@@ -18,15 +18,10 @@ logging.basicConfig(
 
 logger = logging.getLogger("agent_runtime_app")
 
+from deepbs_common.langgraph_workflow import run_agent_workflow
 from deepbs_common.agent_logic import (
-    assemble_html,
     clear_agent_logs,
     get_agent_log,
-    parse_requirements,
-    plan_outline,
-    review_project,
-    suggest_images,
-    write_drafts,
 )
 from deepbs_common.schemas import (
     AgentExecutionLog,
@@ -158,42 +153,42 @@ async def healthz() -> dict:
 @app.post("/internal/parse-tender", response_model=RequirementResult)
 async def parse_tender(request: AgentRequest) -> RequirementResult:
     clear_agent_logs()
-    result = parse_requirements(request.project)
+    result = await run_agent_workflow(request.project, "parse")
     return result
 
 
 @app.post("/internal/plan-outline", response_model=OutlineResult)
 async def plan(request: AgentRequest) -> OutlineResult:
     clear_agent_logs()
-    result = plan_outline(request.project)
+    result = await run_agent_workflow(request.project, "plan")
     return result
 
 
 @app.post("/internal/write-drafts", response_model=DraftResult)
 async def write(request: AgentRequest) -> DraftResult:
     clear_agent_logs()
-    result = write_drafts(request.project)
+    result = await run_agent_workflow(request.project, "write")
     return result
 
 
 @app.post("/internal/review", response_model=ReviewResult)
 async def review(request: AgentRequest) -> ReviewResult:
     clear_agent_logs()
-    result = review_project(request.project)
+    result = await run_agent_workflow(request.project, "review")
     return result
 
 
 @app.post("/internal/suggest-images", response_model=ImageSuggestionResult)
 async def images(request: AgentRequest) -> ImageSuggestionResult:
     clear_agent_logs()
-    result = suggest_images(request.project)
+    result = await run_agent_workflow(request.project, "images")
     return result
 
 
 @app.post("/internal/assemble-html", response_model=HtmlAssembleResult)
 async def html(request: AgentRequest) -> HtmlAssembleResult:
     clear_agent_logs()
-    result = assemble_html(request.project)
+    result = await run_agent_workflow(request.project, "assemble")
     return result
 
 
