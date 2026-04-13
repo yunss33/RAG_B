@@ -129,7 +129,8 @@ async def run_project(project_id: str) -> RunResponse:
 
     outline_payload = await _agent_post("/internal/plan-outline", repository.get_project(project_id))
     project = repository.get_project(project_id)
-    project.outline = outline_payload["outline"]
+    from deepbs_common.schemas import OutlineSection
+    project.outline = [OutlineSection(**section) for section in outline_payload["outline"]]
     project.run_state.stage = ProjectStage.drafting
     project.run_state.task_tree.append({"task": "plan_outline", "status": "completed"})
     _update_agent_log_status(
