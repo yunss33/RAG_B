@@ -3,3 +3,14 @@
 2026-04-13 07:48:12,397 - rag_service_app - ERROR - Qdrant service check failed: [Errno 111] Connection refused
 2026-04-13 07:48:12,697 - rag_service_app - INFO - Embedding service is healthy
 2026-04-13 07:48:12,698 - rag_service_app - INFO - Health check completed with status: degraded
+2026-04-13 10:01:48,948 - rag_service_app - INFO - Health check requested
+2026-04-13 10:01:48,949 - rag_service_app - INFO - Storage service is healthy
+2026-04-13 10:01:48,950 - rag_service_app - ERROR - Qdrant service check failed: [Errno 111] Connection refused
+2026-04-13 10:01:49,205 - rag_service_app - INFO - Embedding service is healthy
+2026-04-13 10:01:49,206 - rag_service_app - INFO - Health check completed with status: degraded
+2026-04-13 10:03:09,134 - rag_service_app - INFO - Health check requested
+2026-04-13 10:03:09,135 - rag_service_app - INFO - Storage service is healthy
+2026-04-13 10:03:09,136 - rag_service_app - ERROR - Qdrant service check failed: [Errno 111] Connection refused
+2026-04-13 10:03:09,426 - rag_service_app - INFO - Embedding service is healthy
+2026-04-13 10:03:09,426 - rag_service_app - INFO - Health check completed with status: degraded
+2026-04-13 10:12:57,685 - rag_service_app - INFO - RAG功能已禁用

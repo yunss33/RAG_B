@@ -476,3 +476,17 @@ async def serve_object(object_key: str):
     if not path.exists():
         raise HTTPException(status_code=404, detail="object not found")
     return FileResponse(path)
+
+
+@app.get("/skills")
+async def get_skills():
+    """获取所有可用技能"""
+    try:
+        async with httpx.AsyncClient(timeout=30) as client:
+            response = await client.get(f"{settings.agent_runtime_base_url}/internal/skills")
+            response.raise_for_status()
+            return response.json()
+    except httpx.RequestError as exc:
+        raise HTTPException(status_code=500, detail=f"技能服务错误: {str(exc)}") from exc
+    except httpx.HTTPStatusError as exc:
+        raise HTTPException(status_code=exc.response.status_code, detail=f"技能服务返回错误: {exc.response.text}") from exc

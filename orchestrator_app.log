@@ -2,3 +2,11 @@
 2026-04-13 07:48:12,882 - orchestrator_app - ERROR - Agent Runtime service check failed: cannot access local variable 'settings' where it is not associated with a value
 2026-04-13 07:48:12,882 - orchestrator_app - INFO - Storage service is healthy
 2026-04-13 07:48:12,882 - orchestrator_app - INFO - Health check completed with status: degraded
+2026-04-13 10:01:49,276 - orchestrator_app - INFO - Health check requested
+2026-04-13 10:01:49,341 - orchestrator_app - ERROR - Agent Runtime service check failed: cannot access local variable 'settings' where it is not associated with a value
+2026-04-13 10:01:49,341 - orchestrator_app - INFO - Storage service is healthy
+2026-04-13 10:01:49,341 - orchestrator_app - INFO - Health check completed with status: degraded
+2026-04-13 10:03:09,493 - orchestrator_app - INFO - Health check requested
+2026-04-13 10:03:09,555 - orchestrator_app - ERROR - Agent Runtime service check failed: cannot access local variable 'settings' where it is not associated with a value
+2026-04-13 10:03:09,555 - orchestrator_app - INFO - Storage service is healthy
+2026-04-13 10:03:09,555 - orchestrator_app - INFO - Health check completed with status: degraded

@@ -1,0 +1,6 @@
+2026-04-13 10:02:13,476 - agent_runtime_app - INFO - Health check requested
+2026-04-13 10:02:13,476 - agent_runtime_app - INFO - Agent logic module is healthy
+2026-04-13 10:02:13,476 - agent_runtime_app - INFO - Health check completed with status: ok
+2026-04-13 10:03:28,593 - agent_runtime_app - INFO - Health check requested
+2026-04-13 10:03:28,593 - agent_runtime_app - INFO - Agent logic module is healthy
+2026-04-13 10:03:28,593 - agent_runtime_app - INFO - Health check completed with status: ok

@@ -202,38 +202,116 @@ async def healthz() -> dict:
 async def ingest_project(project_id: str) -> IngestResponse:
     try:
         project = repository.get_project(project_id)
-    except FileNotFoundError as exc:
-        raise HTTPException(status_code=404, detail="project not found") from exc
+        project.run_state.stage = ProjectStage.ingesting
+        project.run_state.blocked_reason = None
+        repository.save_project(project)
 
-    project.run_state.stage = ProjectStage.ingesting
-    project.run_state.blocked_reason = None
-    repository.save_project(project)
+        evidence_items: list[EvidenceItem] = []
+        document_chunks: list[DocumentChunk] = []
+        image_candidates = 0
+        qdrant_points = []
 
-    evidence_items: list[EvidenceItem] = []
-    document_chunks: list[DocumentChunk] = []
-    image_candidates = 0
-    qdrant_points = []
-
-    if settings.enable_rag:
-        qdrant_available = False
-        try:
-            # 尝试初始化Qdrant集合
-            qdrant_manager.create_collection()
-            qdrant_available = True
-            logger.info("Qdrant is available, using vector database")
-        except Exception as e:
-            logger.warning(f"Qdrant not available: {e}, using local storage only")
+        if settings.enable_rag:
             qdrant_available = False
+            try:
+                # 尝试初始化Qdrant集合
+                qdrant_manager.create_collection()
+                qdrant_available = True
+                logger.info("Qdrant is available, using vector database")
+            except Exception as e:
+                logger.warning(f"Qdrant not available: {e}, using local storage only")
+                qdrant_available = False
 
-        for source in project.source_files:
-                try:
-                    source.parse_status = "processing"
-                    if source.file_type == FileType.image:
-                        image_candidates += 1
-                        # 处理图片文件，提取文本内容
+            for source in project.source_files:
+                    try:
+                        source.parse_status = "processing"
+                        if source.file_type == FileType.image:
+                            image_candidates += 1
+                            # 处理图片文件，提取文本内容
+                            content = _extract_text_for_file(source.object_key, source.file_name)
+                            
+                            # 为图片创建证据项
+                            hints = ["项目理解与总体响应", "技术方案与实施路径", "项目组织与服务保障", "资质、案例与附录"]
+                            for index, hint in enumerate(hints):
+                                # 为证据项生成向量
+                                evidence_content = f"{source.file_name} 提供的支撑信息 {index + 1}: {content[:160]}"
+                                evidence_vector = embedding_manager.get_embedding(evidence_content)
+                                
+                                evidence_item = EvidenceItem(
+                                    section_hint=hint,
+                                    content=evidence_content,
+                                    source_file_id=source.id,
+                                    source_name=source.file_name,
+                                    location_hint=f"image-content",
+                                    page_number=index + 1,
+                                    confidence=0.65 + (index * 0.05),
+                                    vector=evidence_vector
+                                )
+                                evidence_items.append(evidence_item)
+                                
+                                # 创建Qdrant点
+                                point = PointStruct(
+                                    id=f"{project_id}_{source.id}_evidence_{index}",
+                                    vector=evidence_vector,
+                                    payload={
+                                        "project_id": project_id,
+                                        "source_file_id": source.id,
+                                        "source_name": source.file_name,
+                                        "content": evidence_content,
+                                        "section_hint": hint,
+                                        "location_hint": f"image-content",
+                                        "page_number": index + 1,
+                                        "confidence": 0.65 + (index * 0.05),
+                                        "type": "evidence_item"
+                                    }
+                                )
+                                qdrant_points.append(point)
+                            source.parse_status = "indexed"
+                            continue
+
                         content = _extract_text_for_file(source.object_key, source.file_name)
                         
-                        # 为图片创建证据项
+                        # 文档分块
+                        chunks_with_positions = document_chunker.chunk_with_overlap(content)
+                        
+                        # 提取分块文本
+                        chunk_texts = [chunk[0] for chunk in chunks_with_positions]
+                        
+                        # 批量生成向量
+                        if chunk_texts:
+                            vectors = embedding_manager.get_embeddings(chunk_texts)
+                        else:
+                            vectors = []
+                        
+                        # 创建文档分块
+                        for i, ((chunk_text, start_pos, end_pos), vector) in enumerate(zip(chunks_with_positions, vectors)):
+                            chunk = DocumentChunk(
+                                source_file_id=source.id,
+                                source_name=source.file_name,
+                                content=chunk_text,
+                                start_pos=start_pos,
+                                end_pos=end_pos,
+                                vector=vector
+                            )
+                            document_chunks.append(chunk)
+                            
+                            # 创建Qdrant点
+                            point = PointStruct(
+                                id=f"{project_id}_{source.id}_chunk_{i}",
+                                vector=vector,
+                                payload={
+                                    "project_id": project_id,
+                                    "source_file_id": source.id,
+                                    "source_name": source.file_name,
+                                    "content": chunk_text,
+                                    "start_pos": start_pos,
+                                    "end_pos": end_pos,
+                                    "type": "document_chunk"
+                                }
+                            )
+                            qdrant_points.append(point)
+                        
+                        # 创建证据项
                         hints = ["项目理解与总体响应", "技术方案与实施路径", "项目组织与服务保障", "资质、案例与附录"]
                         for index, hint in enumerate(hints):
                             # 为证据项生成向量
@@ -245,123 +323,42 @@ async def ingest_project(project_id: str) -> IngestResponse:
                                 content=evidence_content,
                                 source_file_id=source.id,
                                 source_name=source.file_name,
-                                location_hint=f"image-content",
+                                location_hint=f"chunk-{index + 1}",
+                                chunk_id=f"{project_id}_{source.id}_chunk_{index}" if index < len(chunks_with_positions) else None,
+                                start_pos=chunks_with_positions[index][1] if index < len(chunks_with_positions) else None,
+                                end_pos=chunks_with_positions[index][2] if index < len(chunks_with_positions) else None,
                                 page_number=index + 1,
                                 confidence=0.65 + (index * 0.05),
                                 vector=evidence_vector
                             )
                             evidence_items.append(evidence_item)
                             
-                            # 创建Qdrant点
-                            point = PointStruct(
-                                id=f"{project_id}_{source.id}_evidence_{index}",
-                                vector=evidence_vector,
-                                payload={
-                                    "project_id": project_id,
-                                    "source_file_id": source.id,
-                                    "source_name": source.file_name,
-                                    "content": evidence_content,
-                                    "section_hint": hint,
-                                    "location_hint": f"image-content",
-                                    "page_number": index + 1,
-                                    "confidence": 0.65 + (index * 0.05),
-                                    "type": "evidence_item"
-                                }
-                            )
-                            qdrant_points.append(point)
+                            # 只有在Qdrant可用时才添加Qdrant点
+                            if qdrant_available:
+                                point = PointStruct(
+                                    id=f"{project_id}_{source.id}_evidence_{index}",
+                                    vector=evidence_vector,
+                                    payload={
+                                        "project_id": project_id,
+                                        "source_file_id": source.id,
+                                        "source_name": source.file_name,
+                                        "content": evidence_content,
+                                        "section_hint": hint,
+                                        "location_hint": f"chunk-{index + 1}",
+                                        "chunk_id": f"{project_id}_{source.id}_chunk_{index}" if index < len(chunks_with_positions) else None,
+                                        "start_pos": chunks_with_positions[index][1] if index < len(chunks_with_positions) else None,
+                                        "end_pos": chunks_with_positions[index][2] if index < len(chunks_with_positions) else None,
+                                        "page_number": index + 1,
+                                        "confidence": 0.65 + (index * 0.05),
+                                        "type": "evidence_item"
+                                    }
+                                )
+                                qdrant_points.append(point)
+                        
                         source.parse_status = "indexed"
+                    except Exception as e:
+                        source.parse_status = f"error: {str(e)}"
                         continue
-
-                    content = _extract_text_for_file(source.object_key, source.file_name)
-                    
-                    # 文档分块
-                    chunks_with_positions = document_chunker.chunk_with_overlap(content)
-                    
-                    # 提取分块文本
-                    chunk_texts = [chunk[0] for chunk in chunks_with_positions]
-                    
-                    # 批量生成向量
-                    if chunk_texts:
-                        vectors = embedding_manager.get_embeddings(chunk_texts)
-                    else:
-                        vectors = []
-                    
-                    # 创建文档分块
-                    for i, ((chunk_text, start_pos, end_pos), vector) in enumerate(zip(chunks_with_positions, vectors)):
-                        chunk = DocumentChunk(
-                            source_file_id=source.id,
-                            source_name=source.file_name,
-                            content=chunk_text,
-                            start_pos=start_pos,
-                            end_pos=end_pos,
-                            vector=vector
-                        )
-                        document_chunks.append(chunk)
-                        
-                        # 创建Qdrant点
-                        point = PointStruct(
-                            id=f"{project_id}_{source.id}_chunk_{i}",
-                            vector=vector,
-                            payload={
-                                "project_id": project_id,
-                                "source_file_id": source.id,
-                                "source_name": source.file_name,
-                                "content": chunk_text,
-                                "start_pos": start_pos,
-                                "end_pos": end_pos,
-                                "type": "document_chunk"
-                            }
-                        )
-                        qdrant_points.append(point)
-                    
-                    # 创建证据项
-                    hints = ["项目理解与总体响应", "技术方案与实施路径", "项目组织与服务保障", "资质、案例与附录"]
-                    for index, hint in enumerate(hints):
-                        # 为证据项生成向量
-                        evidence_content = f"{source.file_name} 提供的支撑信息 {index + 1}: {content[:160]}"
-                        evidence_vector = embedding_manager.get_embedding(evidence_content)
-                        
-                        evidence_item = EvidenceItem(
-                            section_hint=hint,
-                            content=evidence_content,
-                            source_file_id=source.id,
-                            source_name=source.file_name,
-                            location_hint=f"chunk-{index + 1}",
-                            chunk_id=f"{project_id}_{source.id}_chunk_{index}" if index < len(chunks_with_positions) else None,
-                            start_pos=chunks_with_positions[index][1] if index < len(chunks_with_positions) else None,
-                            end_pos=chunks_with_positions[index][2] if index < len(chunks_with_positions) else None,
-                            page_number=index + 1,
-                            confidence=0.65 + (index * 0.05),
-                            vector=evidence_vector
-                        )
-                        evidence_items.append(evidence_item)
-                        
-                        # 只有在Qdrant可用时才添加Qdrant点
-                        if qdrant_available:
-                            point = PointStruct(
-                                id=f"{project_id}_{source.id}_evidence_{index}",
-                                vector=evidence_vector,
-                                payload={
-                                    "project_id": project_id,
-                                    "source_file_id": source.id,
-                                    "source_name": source.file_name,
-                                    "content": evidence_content,
-                                    "section_hint": hint,
-                                    "location_hint": f"chunk-{index + 1}",
-                                    "chunk_id": f"{project_id}_{source.id}_chunk_{index}" if index < len(chunks_with_positions) else None,
-                                    "start_pos": chunks_with_positions[index][1] if index < len(chunks_with_positions) else None,
-                                    "end_pos": chunks_with_positions[index][2] if index < len(chunks_with_positions) else None,
-                                    "page_number": index + 1,
-                                    "confidence": 0.65 + (index * 0.05),
-                                    "type": "evidence_item"
-                                }
-                            )
-                            qdrant_points.append(point)
-                    
-                    source.parse_status = "indexed"
-                except Exception as e:
-                    source.parse_status = f"error: {str(e)}"
-                    continue
 
             # 只有在Qdrant可用时才存储向量到Qdrant
             if qdrant_available and qdrant_points:
@@ -370,46 +367,48 @@ async def ingest_project(project_id: str) -> IngestResponse:
                     logger.info(f"Successfully upserted {len(qdrant_points)} vectors to Qdrant")
                 except Exception as e:
                     logger.warning(f"Failed to store vectors to Qdrant: {e}, continuing with local storage only")
-    else:
-        # RAG功能禁用时，生成模拟证据项
-        for source in project.source_files:
-            try:
-                source.parse_status = "processing"
-                if source.file_type == FileType.image:
-                    image_candidates += 1
-                
-                # 生成模拟证据项
-                hints = ["项目理解与总体响应", "技术方案与实施路径", "项目组织与服务保障", "资质、案例与附录"]
-                for index, hint in enumerate(hints):
-                    evidence_item = EvidenceItem(
-                        section_hint=hint,
-                        content=f"{source.file_name} 提供的支撑信息 {index + 1}: 这是模拟的证据内容",
-                        source_file_id=source.id,
-                        source_name=source.file_name,
-                        location_hint=f"mock-location-{index + 1}",
-                        page_number=index + 1,
-                        confidence=0.8,
-                        vector=[0.0] * 1024  # 模拟向量
-                    )
-                    evidence_items.append(evidence_item)
-                
-                source.parse_status = "indexed"
-            except Exception as e:
-                source.parse_status = f"error: {str(e)}"
-                continue
-        logger.info(f"RAG功能禁用，生成 {len(evidence_items)} 个模拟证据项")
+        else:
+            # RAG功能禁用时，生成模拟证据项
+            for source in project.source_files:
+                try:
+                    source.parse_status = "processing"
+                    if source.file_type == FileType.image:
+                        image_candidates += 1
+                    
+                    # 生成模拟证据项
+                    hints = ["项目理解与总体响应", "技术方案与实施路径", "项目组织与服务保障", "资质、案例与附录"]
+                    for index, hint in enumerate(hints):
+                        evidence_item = EvidenceItem(
+                            section_hint=hint,
+                            content=f"{source.file_name} 提供的支撑信息 {index + 1}: 这是模拟的证据内容",
+                            source_file_id=source.id,
+                            source_name=source.file_name,
+                            location_hint=f"mock-location-{index + 1}",
+                            page_number=index + 1,
+                            confidence=0.8,
+                            vector=[0.0] * 1024  # 模拟向量
+                        )
+                        evidence_items.append(evidence_item)
+                    
+                    source.parse_status = "indexed"
+                except Exception as e:
+                    source.parse_status = f"error: {str(e)}"
+                    continue
+            logger.info(f"RAG功能禁用，生成 {len(evidence_items)} 个模拟证据项")
 
-    project.evidence_items = evidence_items
-    project.document_chunks = document_chunks
-    project.run_state.stage = ProjectStage.created
-    repository.save_project(project)
-    return IngestResponse(
-        project_id=project_id,
-        stage=project.run_state.stage,
-        ingested_files=len([f for f in project.source_files if f.parse_status == "indexed"]),
-        evidence_items=len(evidence_items),
-        image_candidates=image_candidates,
-    )
+        project.evidence_items = evidence_items
+        project.document_chunks = document_chunks
+        project.run_state.stage = ProjectStage.created
+        repository.save_project(project)
+        return IngestResponse(
+            project_id=project_id,
+            stage=project.run_state.stage,
+            ingested_files=len([f for f in project.source_files if f.parse_status == "indexed"]),
+            evidence_items=len(evidence_items),
+            image_candidates=image_candidates,
+        )
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail="project not found") from exc
     except Exception as e:
         project.run_state.stage = ProjectStage.failed
         project.run_state.blocked_reason = f"Ingest error: {str(e)}"

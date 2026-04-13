@@ -1,7 +1,1 @@
-{
-  "/skills/page": "app/skills/page.js",
-  "/flow/page": "app/flow/page.js",
-  "/page": "app/page.js",
-  "/projects/new/page": "app/projects/new/page.js",
-  "/projects/[id]/page": "app/projects/[id]/page.js"
-}
+{}

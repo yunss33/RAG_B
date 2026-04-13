@@ -37,10 +37,10 @@ declare namespace __next_route_internal_types__ {
     | `/projects/${SafeSlug<T>}`
     | `/projects/${SafeSlug<T>}/drafts`
     | `/projects/${SafeSlug<T>}/final`
-    | `/projects/${SafeSlug<T>}/outline`
     | `/projects/${SafeSlug<T>}/images`
-    | `/projects/${SafeSlug<T>}/upload`
+    | `/projects/${SafeSlug<T>}/outline`
     | `/projects/${SafeSlug<T>}/requirements`
+    | `/projects/${SafeSlug<T>}/upload`
 
   type RouteImpl<T> = 
     | StaticRoutes

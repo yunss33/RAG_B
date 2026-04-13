@@ -53,7 +53,7 @@ export async function getFinalHtml(id: string) {
 // 技能相关API
 export async function getSkills() {
   const response = await fetch(`${API_BASE}/internal/skills`, { cache: "no-store" });
-  return parseJson<any[]>(response);
+  return parseJson<{ skills: any[] }>(response);
 }
 
 export async function getSkillRecommendations(projectId: string) {
