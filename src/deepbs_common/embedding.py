@@ -10,18 +10,18 @@ from langchain_community.embeddings import DashScopeEmbeddings
 class EmbeddingManager:
     """Embedding模型管理器，使用langchain和阿里百炼的嵌入模型"""
     
-    def __init__(self, model_name: str = "text-embedding-v3", api_key: Optional[str] = None):
+    def __init__(self, model_name: str = "text-embedding-v1", api_key: Optional[str] = None):
         """
         初始化Embedding管理器
         
         Args:
-            model_name: 使用的模型名称，默认为qwen3-vl-embedding
+            model_name: 使用的模型名称，默认为text-embedding-v1
             api_key: 阿里百炼的API密钥，如果为None则从环境变量DASHSCOPE_API_KEY读取
         """
         self.model_name = model_name
         self.api_key = api_key or os.getenv("DASHSCOPE_API_KEY", "sk-e0a3c05a49d444d79967e67cc5d1a2a9")
         self.embeddings = None
-        self.vector_size = 1024  # qwen3-vl-embedding的向量维度
+        self.vector_size = 1536  # text-embedding-v1的向量维度
     
     def initialize(self):
         """
