@@ -1,0 +1,14 @@
+{
+  "/_not-found/page": "/_not-found",
+  "/flow/page": "/flow",
+  "/page": "/",
+  "/projects/[id]/drafts/page": "/projects/[id]/drafts",
+  "/projects/[id]/final/page": "/projects/[id]/final",
+  "/projects/[id]/images/page": "/projects/[id]/images",
+  "/projects/[id]/outline/page": "/projects/[id]/outline",
+  "/projects/[id]/page": "/projects/[id]",
+  "/projects/[id]/requirements/page": "/projects/[id]/requirements",
+  "/projects/[id]/upload/page": "/projects/[id]/upload",
+  "/projects/new/page": "/projects/new",
+  "/skills/page": "/skills"
+}

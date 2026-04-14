@@ -38,7 +38,7 @@ const SkillsPage = () => {
     const fetchRecommendations = async () => {
       try {
         const data = await getSkillRecommendations(testProjectId);
-        setRecommendations(data.recommendations || []);
+        setRecommendations(data || []);
       } catch (err) {
         console.error('获取技能推荐失败:', err);
       }
