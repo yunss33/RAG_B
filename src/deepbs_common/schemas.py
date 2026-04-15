@@ -73,8 +73,24 @@ class EvidenceItem(BaseModel):
     source_file_id: str
     source_name: str
     location_hint: str
+    chunk_id: str | None = None
+    start_pos: int | None = None
+    end_pos: int | None = None
+    page_number: int | None = None
     version: int = 1
     confidence: float = 0.7
+    vector: list[float] | None = None
+
+
+class DocumentChunk(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    source_file_id: str
+    source_name: str
+    content: str
+    start_pos: int
+    end_pos: int
+    vector: list[float] | None = None
+    created_at: str = Field(default_factory=utc_now)
 
 
 class OutlineSection(BaseModel):
@@ -84,6 +100,19 @@ class OutlineSection(BaseModel):
     goal: str
     evidence_requirements: list[str] = Field(default_factory=list)
     status: str = "planned"
+    confirmed: bool = False
+
+
+class EvidenceBinding(BaseModel):
+    evidence_id: str
+    evidence_text: str
+    source_name: str
+    location_hint: str
+    confidence: float
+    start_pos: int | None = None
+    end_pos: int | None = None
+    page_number: int | None = None
+    citation_text: str | None = None
 
 
 class DraftSection(BaseModel):
@@ -91,6 +120,7 @@ class DraftSection(BaseModel):
     outline_section_id: str
     title: str
     content: str
+    evidence_bindings: list[EvidenceBinding] = Field(default_factory=list)
     evidence_ids: list[str] = Field(default_factory=list)
     missing_inputs: list[str] = Field(default_factory=list)
 
@@ -123,12 +153,39 @@ class ImageSelection(BaseModel):
     layout: str | None = None
 
 
+class AgentExecutionLog(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    agent_role: str
+    agent_instance_id: str
+    task_name: str
+    status: str
+    start_time: str | None = None
+    end_time: str | None = None
+    input_data: dict | None = None
+    thought_chain: list[str] = Field(default_factory=list)
+    intermediate_outputs: list[dict] = Field(default_factory=list)
+    final_output: dict | None = None
+    error_message: str | None = None
+
+
+class AgentMessage(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    from_agent: str
+    to_agent: str | None = None
+    message_type: str
+    content: dict
+    timestamp: str = Field(default_factory=utc_now)
+
+
 class RunState(BaseModel):
     stage: ProjectStage = ProjectStage.created
     task_tree: list[dict[str, Any]] = Field(default_factory=list)
     retry_count: int = 0
     blocked_reason: str | None = None
     waiting_for_user: bool = False
+    agent_logs: list[AgentExecutionLog] = Field(default_factory=list)
+    agent_messages: list[AgentMessage] = Field(default_factory=list)
+    active_agents: dict[str, dict] = Field(default_factory=dict)
 
 
 class Project(BaseModel):
@@ -143,7 +200,9 @@ class Project(BaseModel):
     source_files: list[SourceFile] = Field(default_factory=list)
     requirements: list[RequirementItem] = Field(default_factory=list)
     outline: list[OutlineSection] = Field(default_factory=list)
+    outline_confirmed: bool = False
     evidence_items: list[EvidenceItem] = Field(default_factory=list)
+    document_chunks: list[DocumentChunk] = Field(default_factory=list)
     drafts: list[DraftSection] = Field(default_factory=list)
     review_issues: list[ReviewIssue] = Field(default_factory=list)
     image_suggestions: list[ImageSuggestion] = Field(default_factory=list)

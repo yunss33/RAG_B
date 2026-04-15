@@ -48,7 +48,35 @@ class LocalObjectStorage(ObjectStorage):
         suffix = path.suffix.lower()
         if suffix in {".txt", ".md", ".html", ".json", ".csv"}:
             return path.read_text(encoding="utf-8", errors="ignore")
+        elif suffix == ".pdf":
+            return self._extract_pdf_text(path)
+        elif suffix in {".jpg", ".jpeg", ".png", ".gif", ".bmp"}:
+            return self._extract_image_text(path)
         return ""
+
+    def _extract_pdf_text(self, path) -> str:
+        try:
+            from pypdf import PdfReader
+            reader = PdfReader(path)
+            text = []
+            for page_num in range(len(reader.pages)):
+                page = reader.pages[page_num]
+                text.append(page.extract_text() or "")
+            return "\n".join(text)
+        except Exception as e:
+            print(f"PDF extraction error: {e}")
+            return f"PDF文件内容提取失败: {str(e)}"
+
+    def _extract_image_text(self, path) -> str:
+        try:
+            from PIL import Image
+            import pytesseract
+            image = Image.open(path)
+            text = pytesseract.image_to_string(image, lang="chi_sim+eng")
+            return text
+        except Exception as e:
+            print(f"Image OCR error: {e}")
+            return f"图片内容提取失败: {str(e)}"
 
     def read_bytes(self, object_key: str) -> bytes:
         return (self.object_dir / object_key).read_bytes()

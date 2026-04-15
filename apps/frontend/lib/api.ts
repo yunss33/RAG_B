@@ -20,6 +20,11 @@ export async function getProjectStatus(id: string) {
   return parseJson<any>(response);
 }
 
+export async function getProject(id: string) {
+  const response = await fetch(`${API_BASE}/projects/${id}`, { cache: "no-store" });
+  return parseJson<any>(response);
+}
+
 export async function getRequirements(id: string) {
   const response = await fetch(`${API_BASE}/projects/${id}/requirements`, { cache: "no-store" });
   return parseJson<any[]>(response);
@@ -42,6 +47,36 @@ export async function getImageSuggestions(id: string) {
 
 export async function getFinalHtml(id: string) {
   const response = await fetch(`${API_BASE}/projects/${id}/final-html`, { cache: "no-store" });
+  return parseJson<any>(response);
+}
+
+// 技能相关API
+export async function getSkills() {
+  const response = await fetch(`${API_BASE}/internal/skills`, { cache: "no-store" });
+  return parseJson<{ skills: any[] }>(response);
+}
+
+export async function getSkillRecommendations(projectId: string) {
+  const response = await fetch(`${API_BASE}/internal/skills/recommend`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ project: { id: projectId } }),
+    cache: "no-store"
+  });
+  return parseJson<any[]>(response);
+}
+
+export async function executeSkill(skillName: string, projectId: string, context?: any) {
+  const response = await fetch(`${API_BASE}/internal/skills/execute/${skillName}`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ project: { id: projectId, name: "Test Project" }, context }),
+    cache: "no-store"
+  });
   return parseJson<any>(response);
 }
 

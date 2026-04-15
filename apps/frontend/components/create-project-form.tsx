@@ -15,18 +15,29 @@ export function CreateProjectForm() {
       description: String(formData.get("description") || ""),
       target_language: String(formData.get("target_language") || "zh-CN")
     };
-    const response = await fetch(`${API_BASE}/projects`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload)
-    });
-    if (!response.ok) {
-      setError(await response.text());
-      return;
+    try {
+      console.log('Submitting project creation:', payload);
+      const response = await fetch(`${API_BASE}/projects`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      console.log('Response status:', response.status);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log('Error response:', errorText);
+        setError(errorText);
+        return;
+      }
+      const data = await response.json();
+      console.log('Response data:', data);
+      console.log('Project ID:', data.project_id);
+      router.push(`/projects/${data.project_id}`);
+      router.refresh();
+    } catch (error) {
+      console.log('Error:', error);
+      setError((error as Error).message);
     }
-    const data = await response.json();
-    router.push(`/projects/${data.project_id}`);
-    router.refresh();
   }
 
   return (

@@ -1,0 +1,50 @@
+{
+  "id": "5e27f7a0-b794-4452-a528-a66a1f9b23df",
+  "name": "测试RAG处理PDF和图片",
+  "description": "测试RAG服务处理PDF和图片文件的能力",
+  "target_language": "zh-CN",
+  "created_by": "admin",
+  "created_at": "2026-04-13T07:30:40.006178+00:00",
+  "config": {},
+  "run_state": {
+    "stage": "failed",
+    "task_tree": [],
+    "retry_count": 0,
+    "blocked_reason": "RAG service returned error: {\"detail\":\"Ingest failed: [Errno 111] Connection refused\"}",
+    "waiting_for_user": false,
+    "agent_logs": [],
+    "agent_messages": [],
+    "active_agents": {}
+  },
+  "source_files": [
+    {
+      "id": "a10c3322-621b-4fda-bb5d-90317d46c5ac",
+      "file_name": "test_text.txt",
+      "file_type": "knowledge",
+      "object_key": "e900a3f7-88e2-4384-a543-296aef293509.txt",
+      "mime_type": null,
+      "parse_status": "uploaded",
+      "version": 1,
+      "created_at": "2026-04-13T07:30:40.010644+00:00"
+    },
+    {
+      "id": "c881426e-9635-4bf6-92e3-53f4ac9334d7",
+      "file_name": "test_image.png",
+      "file_type": "image",
+      "object_key": "095c0d3b-11be-4e06-9e86-0898bbf71320.png",
+      "mime_type": null,
+      "parse_status": "uploaded",
+      "version": 1,
+      "created_at": "2026-04-13T07:30:40.014279+00:00"
+    }
+  ],
+  "requirements": [],
+  "outline": [],
+  "evidence_items": [],
+  "document_chunks": [],
+  "drafts": [],
+  "review_issues": [],
+  "image_suggestions": [],
+  "image_selections": [],
+  "final_html_object_key": null
+}

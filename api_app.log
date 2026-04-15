@@ -1,0 +1,27 @@
+2026-04-13 07:30:40,252 - httpx - INFO - HTTP Request: POST http://localhost:8102/internal/projects/5e27f7a0-b794-4452-a528-a66a1f9b23df/ingest "HTTP/1.1 500 Internal Server Error"
+2026-04-13 07:48:12,149 - api_app - INFO - Health check requested
+2026-04-13 07:48:12,149 - api_app - INFO - Storage service is healthy
+2026-04-13 07:48:12,700 - httpx - INFO - HTTP Request: GET http://localhost:8102/healthz "HTTP/1.1 200 OK"
+2026-04-13 07:48:12,701 - api_app - INFO - RAG service is healthy
+2026-04-13 07:48:12,886 - httpx - INFO - HTTP Request: GET http://localhost:8101/healthz "HTTP/1.1 200 OK"
+2026-04-13 07:48:12,886 - api_app - INFO - Orchestrator service is healthy
+2026-04-13 07:48:12,887 - api_app - INFO - Health check completed with status: ok
+2026-04-13 07:48:12,969 - httpx - INFO - HTTP Request: POST http://localhost:8102/internal/projects/98c2d077-bd24-43f5-85ba-9fede3f45f58/ingest "HTTP/1.1 500 Internal Server Error"
+2026-04-13 10:01:48,881 - api_app - INFO - Health check requested
+2026-04-13 10:01:48,881 - api_app - INFO - Storage service is healthy
+2026-04-13 10:01:49,208 - httpx - INFO - HTTP Request: GET http://localhost:8102/healthz "HTTP/1.1 200 OK"
+2026-04-13 10:01:49,209 - api_app - INFO - RAG service is healthy
+2026-04-13 10:01:49,345 - httpx - INFO - HTTP Request: GET http://localhost:8101/healthz "HTTP/1.1 200 OK"
+2026-04-13 10:01:49,346 - api_app - INFO - Orchestrator service is healthy
+2026-04-13 10:01:49,347 - api_app - INFO - Health check completed with status: ok
+2026-04-13 10:03:09,024 - api_app - INFO - Health check requested
+2026-04-13 10:03:09,024 - api_app - INFO - Storage service is healthy
+2026-04-13 10:03:09,428 - httpx - INFO - HTTP Request: GET http://localhost:8102/healthz "HTTP/1.1 200 OK"
+2026-04-13 10:03:09,429 - api_app - INFO - RAG service is healthy
+2026-04-13 10:03:09,559 - httpx - INFO - HTTP Request: GET http://localhost:8101/healthz "HTTP/1.1 200 OK"
+2026-04-13 10:03:09,560 - api_app - INFO - Orchestrator service is healthy
+2026-04-13 10:03:09,560 - api_app - INFO - Health check completed with status: ok
+2026-04-13 10:03:16,738 - httpx - INFO - HTTP Request: GET http://localhost:8103/internal/skills "HTTP/1.1 404 Not Found"
+2026-04-13 10:04:12,209 - httpx - INFO - HTTP Request: GET http://localhost:8103/internal/skills "HTTP/1.1 200 OK"
+2026-04-13 10:24:17,797 - httpx - INFO - HTTP Request: POST http://localhost:8103/internal/skills/execute/parse_requirements "HTTP/1.1 422 Unprocessable Content"
+2026-04-13 10:24:36,562 - httpx - INFO - HTTP Request: POST http://localhost:8103/internal/skills/execute/parse_requirements "HTTP/1.1 200 OK"
