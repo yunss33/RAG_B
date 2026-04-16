@@ -1,3 +1,6 @@
+'use client';
+import { useState, useCallback } from 'react';
+
 interface Agent {
   id: string;
   name: string;
@@ -19,8 +22,8 @@ interface AgentFlowProps {
 }
 
 export default function AgentFlow({ agents, relationships }: AgentFlowProps) {
-  // 简单的布局算法
-  const layoutAgents = () => {
+  // 初始布局算法
+  const initialLayout = () => {
     const positions: Record<string, { x: number; y: number }> = {};
     const width = 800;
     const height = 400;
@@ -38,7 +41,44 @@ export default function AgentFlow({ agents, relationships }: AgentFlowProps) {
     return positions;
   };
 
-  const agentPositions = layoutAgents();
+  // 状态管理
+  const [agentPositions, setAgentPositions] = useState<Record<string, { x: number; y: number }>>(initialLayout());
+  const [draggingAgent, setDraggingAgent] = useState<string | null>(null);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+
+  // 处理鼠标按下事件
+  const handleMouseDown = useCallback((agentId: string, e: React.MouseEvent) => {
+    const pos = agentPositions[agentId];
+    if (pos) {
+      const svgRect = (e.currentTarget as SVGGElement).closest('svg')?.getBoundingClientRect();
+      if (svgRect) {
+        setDraggingAgent(agentId);
+        setDragOffset({
+          x: e.clientX - svgRect.left - pos.x,
+          y: e.clientY - svgRect.top - pos.y
+        });
+      }
+    }
+  }, [agentPositions]);
+
+  // 处理鼠标移动事件
+  const handleMouseMove = useCallback((e: React.MouseEvent) => {
+    if (draggingAgent) {
+      const svgRect = (e.currentTarget as SVGSVGElement).getBoundingClientRect();
+      setAgentPositions(prev => ({
+        ...prev,
+        [draggingAgent]: {
+          x: e.clientX - svgRect.left - dragOffset.x,
+          y: e.clientY - svgRect.top - dragOffset.y
+        }
+      }));
+    }
+  }, [draggingAgent, dragOffset]);
+
+  // 处理鼠标释放事件
+  const handleMouseUp = useCallback(() => {
+    setDraggingAgent(null);
+  }, []);
   const getAgentTypeColor = (type: string) => {
     const colors = {
       general: '#4CAF50',
