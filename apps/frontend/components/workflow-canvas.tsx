@@ -28,6 +28,7 @@ interface WorkflowCanvasProps {
   onNodeDelete: (nodeId: string) => void;
   onEdgeAdd: (edge: Edge) => void;
   onEdgeDelete: (edgeId: string) => void;
+  onAddNode?: (type: string, position: { x: number; y: number }) => void;
   zoom: number;
   pan: { x: number; y: number };
   onPan: (pan: { x: number; y: number }) => void;
@@ -42,6 +43,7 @@ const WorkflowCanvas = forwardRef<HTMLDivElement, WorkflowCanvasProps>(({
   onNodeDelete,
   onEdgeAdd,
   onEdgeDelete,
+  onAddNode,
   zoom,
   pan,
   onPan,
@@ -51,6 +53,8 @@ const WorkflowCanvas = forwardRef<HTMLDivElement, WorkflowCanvasProps>(({
   const [connecting, setConnecting] = useState<string | null>(null);
   const [connectionStart, setConnectionStart] = useState({ x: 0, y: 0 });
   const [connectionEnd, setConnectionEnd] = useState({ x: 0, y: 0 });
+  const [isPanning, setIsPanning] = useState(false);
+  const [panStart, setPanStart] = useState({ x: 0, y: 0 });
   const canvasRef = useRef<HTMLDivElement>(null);
 
   const handleNodeMouseDown = useCallback((nodeId: string, e: React.MouseEvent) => {
@@ -74,16 +78,28 @@ const WorkflowCanvas = forwardRef<HTMLDivElement, WorkflowCanvasProps>(({
         });
       }
       setDragStart({ x: e.clientX, y: e.clientY });
+    } else if (isPanning) {
+      const deltaX = e.clientX - panStart.x;
+      const deltaY = e.clientY - panStart.y;
+      onPan({
+        x: pan.x + deltaX,
+        y: pan.y + deltaY,
+      });
+      setPanStart({ x: e.clientX, y: e.clientY });
     }
 
     if (connecting) {
       setConnectionEnd({ x: e.clientX, y: e.clientY });
     }
-  }, [draggingNode, dragStart, nodes, onNodeUpdate, zoom, connecting]);
+  }, [draggingNode, dragStart, nodes, onNodeUpdate, zoom, connecting, isPanning, panStart, pan, onPan]);
 
   const handleMouseUp = useCallback((e: React.MouseEvent) => {
     if (draggingNode) {
       setDraggingNode(null);
+    }
+
+    if (isPanning) {
+      setIsPanning(false);
     }
 
     if (connecting) {
@@ -119,11 +135,16 @@ const WorkflowCanvas = forwardRef<HTMLDivElement, WorkflowCanvasProps>(({
 
       setConnecting(null);
     }
-  }, [draggingNode, connecting, nodes, edges, onEdgeAdd]);
+  }, [draggingNode, connecting, nodes, edges, onEdgeAdd, isPanning]);
 
   const handleCanvasMouseDown = useCallback((e: React.MouseEvent) => {
     // 点击空白处取消选择
     onNodeSelect(null as unknown as Node);
+    // 开始拖拽画布
+    if (e.button === 0) { // 左键
+      setIsPanning(true);
+      setPanStart({ x: e.clientX, y: e.clientY });
+    }
   }, [onNodeSelect]);
 
   const handleConnectStart = useCallback((nodeId: string, e: React.MouseEvent) => {
@@ -132,6 +153,24 @@ const WorkflowCanvas = forwardRef<HTMLDivElement, WorkflowCanvasProps>(({
     setConnectionStart({ x: e.clientX, y: e.clientY });
     setConnectionEnd({ x: e.clientX, y: e.clientY });
   }, []);
+
+  const handleDragOver = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+  }, []);
+
+  const handleDrop = useCallback((e: React.DragEvent) => {
+    e.preventDefault();
+    const type = e.dataTransfer.getData('text/plain');
+    if (type) {
+      // 计算相对于画布的位置
+      const rect = canvasRef.current?.getBoundingClientRect();
+      if (rect) {
+        const x = (e.clientX - rect.left - pan.x) / zoom;
+        const y = (e.clientY - rect.top - pan.y) / zoom;
+        onAddNode?.(type, { x, y });
+      }
+    }
+  }, [pan, zoom, onAddNode]);
 
   const getAgentTypeColor = (type: string) => {
     const colors = {
@@ -161,6 +200,8 @@ const WorkflowCanvas = forwardRef<HTMLDivElement, WorkflowCanvasProps>(({
       onMouseMove={handleMouseMove}
       onMouseUp={handleMouseUp}
       onMouseLeave={handleMouseUp}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
     >
       <div className="canvas-grid">
         {Array.from({ length: 20 }).map((_, i) => (

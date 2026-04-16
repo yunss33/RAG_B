@@ -330,6 +330,7 @@ export default function OrchestrationPage() {
           onNodeDelete={handleNodeDelete}
           onEdgeAdd={handleEdgeAdd}
           onEdgeDelete={handleEdgeDelete}
+          onAddNode={handleNodeAdd}
           zoom={zoom}
           pan={pan}
           onPan={handlePan}
