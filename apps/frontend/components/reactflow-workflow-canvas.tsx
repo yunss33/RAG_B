@@ -1,12 +1,19 @@
 'use client';
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
 import ReactFlow, {
   Background,
   useNodesState,
   useEdgesState,
   useReactFlow,
+  Node as ReactFlowNode,
+  Edge as ReactFlowEdge,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
+import CustomNode from './custom-node';
+
+const nodeTypes = {
+  custom: CustomNode,
+};
 
 interface Node {
   id: string;
@@ -55,41 +62,50 @@ export default function ReactFlowWorkflowCanvas({
   pan,
   onPan,
 }: ReactFlowWorkflowCanvasProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+  const [nodes, setNodes, onNodesChange] = useNodesState<ReactFlowNode>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<ReactFlowEdge>([]);
   const reactFlow = useReactFlow();
 
-  const getAgentTypeColor = (type: string) => {
-    const colors = {
-      general: '#4CAF50',
-      analyzer: '#2196F3',
-      planner: '#FF9800',
-      writer: '#9C27B0',
-      reviewer: '#F44336',
-      coordinator: '#607D8B',
-    };
-    return colors[type as keyof typeof colors] || '#9E9E9E';
-  };
-
-  const handleNodeClick = useCallback((event, node) => {
-    onNodeSelect({
+  useEffect(() => {
+    const reactFlowNodes = initialNodes.map(node => ({
       id: node.id,
-      type: node.data.type,
+      type: 'custom',
       position: node.position,
-      data: node.data,
-    });
-  }, [onNodeSelect]);
+      data: {
+        ...node.data,
+        type: node.type,
+      },
+      selected: selectedNode?.id === node.id,
+    }));
+    setNodes(reactFlowNodes);
+  }, [initialNodes, selectedNode, setNodes]);
 
-  const handleNodeDragStop = useCallback((event, node) => {
-    onNodeUpdate({
-      id: node.id,
-      type: node.data.type,
-      position: node.position,
-      data: node.data,
-    });
-  }, [onNodeUpdate]);
+  useEffect(() => {
+    const reactFlowEdges = initialEdges.map(edge => ({
+      ...edge,
+      animated: true,
+    }));
+    setEdges(reactFlowEdges);
+  }, [initialEdges, setEdges]);
 
-  const handleConnect = useCallback((params) => {
+  const handleNodeClick = useCallback((event: React.MouseEvent, node: ReactFlowNode) => {
+    const originalNode = initialNodes.find(n => n.id === node.id);
+    if (originalNode) {
+      onNodeSelect(originalNode);
+    }
+  }, [initialNodes, onNodeSelect]);
+
+  const handleNodeDragStop = useCallback((event: React.MouseEvent, node: ReactFlowNode) => {
+    const originalNode = initialNodes.find(n => n.id === node.id);
+    if (originalNode) {
+      onNodeUpdate({
+        ...originalNode,
+        position: node.position,
+      });
+    }
+  }, [initialNodes, onNodeUpdate]);
+
+  const handleConnect = useCallback((params: any) => {
     const { source, target } = params;
     onEdgeAdd({
       id: `e${source}-${target}`,
@@ -99,16 +115,16 @@ export default function ReactFlowWorkflowCanvas({
     });
   }, [onEdgeAdd]);
 
-  const handleEdgeDelete = useCallback((edgeId) => {
+  const handleEdgeDelete = useCallback((edgeId: string) => {
     onEdgeDelete(edgeId);
   }, [onEdgeDelete]);
 
-  const handleDragOver = useCallback((event) => {
+  const handleDragOver = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     event.dataTransfer.dropEffect = 'copy';
   }, []);
 
-  const handleDrop = useCallback((event) => {
+  const handleDrop = useCallback((event: React.DragEvent) => {
     event.preventDefault();
     const type = event.dataTransfer.getData('text/plain');
     if (!type) return;
@@ -121,57 +137,44 @@ export default function ReactFlowWorkflowCanvas({
     onAddNode(type, position);
   }, [reactFlow, onAddNode]);
 
-  // 转换节点格式以适应React Flow
-  const reactFlowNodes = nodes.map(node => ({
-    ...node,
-    data: {
-      ...node.data,
-      type: node.type,
-    },
-    style: {
-      borderColor: getAgentTypeColor(node.type),
-    },
-  }));
-
-  // 转换边格式以适应React Flow
-  const reactFlowEdges = edges.map(edge => ({
-    ...edge,
-    label: edge.label,
-  }));
-
   return (
     <div
       className="workflow-canvas"
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
+      style={{ height: '100%', width: '100%' }}
     >
       <ReactFlow
-        nodes={reactFlowNodes}
-        edges={reactFlowEdges}
+        nodes={nodes}
+        edges={edges}
+        nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodeClick={handleNodeClick}
         onNodeDragStop={handleNodeDragStop}
         onConnect={handleConnect}
         onEdgeDelete={handleEdgeDelete}
+        onDragOver={handleDragOver}
+        onDrop={handleDrop}
         defaultViewport={{
           x: pan.x,
           y: pan.y,
           zoom,
         }}
-        onViewportChange={({ x, y, zoom }) => {
+        onViewportChange={({ x, y, zoom: newZoom }) => {
           onPan({ x, y });
         }}
         panOnScroll={true}
         panOnDrag={true}
         zoomOnDoubleClick={true}
-        minZoom={0.5}
-        maxZoom={2}
+        minZoom={0.2}
+        maxZoom={4}
+        nodesDraggable={true}
+        nodesConnectable={true}
+        fitView
       >
         <Background
-          gap={[20, 20]}
+          gap={[16, 16]}
           size={1}
-          color="#d9c8b0"
+          color="#e2e8f0"
         />
       </ReactFlow>
     </div>
