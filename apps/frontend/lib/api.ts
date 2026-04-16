@@ -115,4 +115,13 @@ export async function deleteMemory(id: string) {
   return parseJson<any>(response);
 }
 
+export async function updateMemory(id: string, data: any) {
+  const response = await fetch(`${API_BASE}/memories/${id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return parseJson<any>(response);
+}
+
 export { API_BASE };

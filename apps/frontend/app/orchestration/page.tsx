@@ -1,5 +1,6 @@
 'use client';
 import { useState, useRef, useCallback, useEffect } from 'react';
+import { ReactFlowProvider } from 'reactflow';
 import ReactFlowWorkflowCanvas from '@/components/reactflow-workflow-canvas';
 import NodeLibrary from '@/components/node-library';
 import NodeInspector from '@/components/node-inspector';
