@@ -72,18 +72,33 @@ export default function ReactFlowWorkflowCanvas({
   nodeStatuses = {},
 }: ReactFlowWorkflowCanvasProps) {
   const reactFlow = useReactFlow();
+  
+  // 使用React Flow的状态管理
+  const [nodes, setNodes, onNodesChange] = useNodesState<ReactFlowNode>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<ReactFlowEdge>([]);
 
-  // 转换节点数据为React Flow格式
-  const nodes = initialNodes.map(node => ({
-    id: node.id,
-    type: 'custom',
-    position: node.position,
-    data: {
-      ...node.data,
-      type: node.type,
-    },
-    selected: selectedNode?.id === node.id,
-  }));
+  // 同步初始数据到React Flow状态
+  useEffect(() => {
+    const reactFlowNodes = initialNodes.map(node => ({
+      id: node.id,
+      type: 'custom',
+      position: node.position,
+      data: {
+        ...node.data,
+        type: node.type,
+      },
+      selected: selectedNode?.id === node.id,
+    }));
+    setNodes(reactFlowNodes);
+  }, [initialNodes, selectedNode, setNodes]);
+
+  useEffect(() => {
+    const reactFlowEdges = initialEdges.map(edge => ({
+      ...edge,
+      animated: true,
+    }));
+    setEdges(reactFlowEdges);
+  }, [initialEdges, setEdges]);
 
   // 定义节点类型配置
   const nodeTypes = {
@@ -92,16 +107,6 @@ export default function ReactFlowWorkflowCanvas({
       return <CustomNode data={data} nodeId={id} nodeStatus={nodeStatus} />;
     },
   };
-
-  // 转换边数据为React Flow格式
-  const edges = initialEdges.map(edge => ({
-    ...edge,
-    animated: true,
-  }));
-
-  // 空的onNodesChange和onEdgesChange函数
-  const onNodesChange = () => {};
-  const onEdgesChange = () => {};
 
   const handleNodeClick = useCallback((event: React.MouseEvent, node: ReactFlowNode) => {
     const originalNode = initialNodes.find(n => n.id === node.id);
@@ -195,6 +200,8 @@ export default function ReactFlowWorkflowCanvas({
         maxZoom={4}
         nodesDraggable={true}
         nodesConnectable={true}
+        snapToGrid={true}
+        snapGrid={[16, 16]}
         attributionPosition="top-right"
       >
         <Background
