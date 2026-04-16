@@ -1,3 +1,4 @@
+'use client';
 import { useState } from 'react';
 import AgentEditor from '@/components/agent-editor';
 import TeamRelationships from '@/components/team-relationships';
