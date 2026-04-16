@@ -53,6 +53,8 @@ export default function NodeLibrary({ onAddNode }: NodeLibraryProps) {
 
   const handleDragStart = useCallback((e: React.DragEvent, type: string) => {
     e.dataTransfer.setData('text/plain', type);
+    e.dataTransfer.effectAllowed = 'copy';
+    console.log('Drag started for node type:', type);
   }, []);
 
   return (

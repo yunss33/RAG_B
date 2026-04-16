@@ -13,6 +13,7 @@ import ReactFlow, {
 import 'reactflow/dist/style.css';
 import CustomNode from './custom-node';
 
+// 将 nodeTypes 移到组件外部以避免 React Flow 警告
 const nodeTypes = {
   custom: CustomNode,
 };
@@ -68,31 +69,29 @@ export default function ReactFlowWorkflowCanvas({
   pan,
   onPan,
 }: ReactFlowWorkflowCanvasProps) {
-  const [nodes, setNodes, onNodesChange] = useNodesState<ReactFlowNode>([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState<ReactFlowEdge>([]);
   const reactFlow = useReactFlow();
 
-  useEffect(() => {
-    const reactFlowNodes = initialNodes.map(node => ({
-      id: node.id,
-      type: 'custom',
-      position: node.position,
-      data: {
-        ...node.data,
-        type: node.type,
-      },
-      selected: selectedNode?.id === node.id,
-    }));
-    setNodes(reactFlowNodes);
-  }, [initialNodes, selectedNode, setNodes]);
+  // 转换节点数据为React Flow格式
+  const nodes = initialNodes.map(node => ({
+    id: node.id,
+    type: 'custom',
+    position: node.position,
+    data: {
+      ...node.data,
+      type: node.type,
+    },
+    selected: selectedNode?.id === node.id,
+  }));
 
-  useEffect(() => {
-    const reactFlowEdges = initialEdges.map(edge => ({
-      ...edge,
-      animated: true,
-    }));
-    setEdges(reactFlowEdges);
-  }, [initialEdges, setEdges]);
+  // 转换边数据为React Flow格式
+  const edges = initialEdges.map(edge => ({
+    ...edge,
+    animated: true,
+  }));
+
+  // 空的onNodesChange和onEdgesChange函数
+  const onNodesChange = () => {};
+  const onEdgesChange = () => {};
 
   const handleNodeClick = useCallback((event: React.MouseEvent, node: ReactFlowNode) => {
     const originalNode = initialNodes.find(n => n.id === node.id);
@@ -121,8 +120,13 @@ export default function ReactFlowWorkflowCanvas({
     });
   }, [onEdgeAdd]);
 
-  const handleEdgeDelete = useCallback((edgeId: string) => {
-    onEdgeDelete(edgeId);
+  const handleEdgesChange = useCallback((changes: any) => {
+    // 处理边的删除事件
+    changes.forEach((change: any) => {
+      if (change.type === 'remove' && change.itemType === 'edge') {
+        onEdgeDelete(change.id);
+      }
+    });
   }, [onEdgeDelete]);
 
   const handleDragOver = useCallback((event: React.DragEvent) => {
@@ -140,7 +144,12 @@ export default function ReactFlowWorkflowCanvas({
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
 
-    onAddNode(type, { x, y });
+    // 确保位置是正数
+    const normalizedX = Math.max(0, x);
+    const normalizedY = Math.max(0, y);
+
+    console.log('Dropped node type:', type, 'at position:', { x: normalizedX, y: normalizedY });
+    onAddNode(type, { x: normalizedX, y: normalizedY });
   }, [onAddNode]);
 
   return (
@@ -155,18 +164,19 @@ export default function ReactFlowWorkflowCanvas({
         edges={edges}
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
-        onEdgesChange={onEdgesChange}
+        onEdgesChange={handleEdgesChange}
         onNodeClick={handleNodeClick}
         onNodeDragStop={handleNodeDragStop}
         onConnect={handleConnect}
-        onEdgeDelete={handleEdgeDelete}
         defaultViewport={{
           x: pan.x,
           y: pan.y,
           zoom,
         }}
-        onViewportChange={({ x, y, zoom: newZoom }) => {
-          onPan({ x, y });
+        onViewportChange={(viewport) => {
+          if (viewport) {
+            onPan({ x: viewport.x, y: viewport.y });
+          }
         }}
         panOnScroll={true}
         panOnDrag={true}
@@ -175,7 +185,6 @@ export default function ReactFlowWorkflowCanvas({
         maxZoom={4}
         nodesDraggable={true}
         nodesConnectable={true}
-        fitView
         attributionPosition="top-right"
       >
         <Background

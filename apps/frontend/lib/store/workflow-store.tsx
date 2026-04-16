@@ -308,8 +308,10 @@ export function WorkflowProvider({ children }: WorkflowProviderProps) {
 
   // 添加节点
   const addNode = useCallback((type: string, position: { x: number; y: number }) => {
+    console.log('Adding node:', { type, position });
+    // 使用时间戳生成唯一ID
     const newNode = {
-      id: (state.nodes.length + 1).toString(),
+      id: Date.now().toString(),
       type,
       position,
       data: {
@@ -318,8 +320,9 @@ export function WorkflowProvider({ children }: WorkflowProviderProps) {
         capabilities: [],
       },
     };
+    console.log('New node:', newNode);
     dispatch({ type: 'ADD_NODE', payload: newNode });
-  }, [state.nodes.length]);
+  }, []);
 
   // 更新节点
   const updateNode = useCallback((node: any) => {
