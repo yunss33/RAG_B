@@ -2,6 +2,8 @@
 import { useCallback, useEffect } from 'react';
 import ReactFlow, {
   Background,
+  Controls,
+  MiniMap,
   useNodesState,
   useEdgesState,
   useReactFlow,
@@ -13,6 +15,10 @@ import CustomNode from './custom-node';
 
 const nodeTypes = {
   custom: CustomNode,
+};
+
+const nodeClassName = (node: ReactFlowNode) => {
+  return node.data.type;
 };
 
 interface Node {
@@ -170,12 +176,19 @@ export default function ReactFlowWorkflowCanvas({
         nodesDraggable={true}
         nodesConnectable={true}
         fitView
+        attributionPosition="top-right"
       >
         <Background
           gap={[16, 16]}
           size={1}
           color="#e2e8f0"
         />
+        <MiniMap 
+          nodeClassName={nodeClassName} 
+          zoomable 
+          pannable 
+        />
+        <Controls />
       </ReactFlow>
     </div>
   );
