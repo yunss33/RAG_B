@@ -147,6 +147,8 @@ export default function ReactFlowWorkflowCanvas({
     <div
       className="workflow-canvas"
       style={{ height: '100%', width: '100%' }}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
     >
       <ReactFlow
         nodes={nodes}
@@ -158,8 +160,6 @@ export default function ReactFlowWorkflowCanvas({
         onNodeDragStop={handleNodeDragStop}
         onConnect={handleConnect}
         onEdgeDelete={handleEdgeDelete}
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
         defaultViewport={{
           x: pan.x,
           y: pan.y,
