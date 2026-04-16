@@ -91,16 +91,18 @@ export default function NodeInspector({ node, onUpdate, onDelete }: NodeInspecto
 
   const handleDelete = useCallback(() => {
     if (editedNode) {
-      onDelete(editedNode.id);
+      if (confirm('确定要删除这个节点吗？')) {
+        onDelete(editedNode.id);
+      }
     }
   }, [editedNode, onDelete]);
 
   if (!node) {
     return (
       <div className="node-inspector">
-        <h3>节点检查器</h3>
         <div className="empty-state">
-          <p>选择一个节点进行编辑</p>
+          <div style={{ fontSize: '1.5rem', marginBottom: '8px' }}>🎯</div>
+          <p style={{ margin: '0', color: '#6a5f52' }}>选择一个节点进行编辑</p>
         </div>
       </div>
     );
@@ -108,94 +110,188 @@ export default function NodeInspector({ node, onUpdate, onDelete }: NodeInspecto
 
   return (
     <div className="node-inspector">
-      <h3>节点检查器</h3>
-      <div className="inspector-section">
-        <h4>基本信息</h4>
-        <div className="form-group">
-          <label>名称</label>
+      <div style={{ padding: '16px', backgroundColor: '#fffaf4', borderBottom: '1px solid #d9c8b0' }}>
+        <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 600 }}>节点设置</h3>
+        <p style={{ margin: '0', fontSize: '12px', color: '#6a5f52' }}>{node.type} 智能体</p>
+      </div>
+      
+      <div style={{ padding: '16px' }}>
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: 600, color: '#251f18' }}>名称</label>
           <input
             type="text"
             value={editedNode?.data.name || ''}
             onChange={(e) => handleUpdateData('name', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #d9c8b0',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontFamily: 'inherit',
+            }}
           />
         </div>
-        <div className="form-group">
-          <label>描述</label>
+        
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: 600, color: '#251f18' }}>描述</label>
           <textarea
             value={editedNode?.data.description || ''}
             onChange={(e) => handleUpdateData('description', e.target.value)}
             rows={3}
+            style={{
+              width: '100%',
+              padding: '8px 12px',
+              border: '1px solid #d9c8b0',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontFamily: 'inherit',
+              resize: 'vertical',
+            }}
           />
         </div>
-      </div>
-      <div className="inspector-section">
-        <h4>能力</h4>
-        <div className="capabilities">
-          {editedNode?.data.capabilities.map((capability, index) => (
-            <div key={index} className="capability-item">
-              <span>{capability}</span>
-              <button
-                type="button"
-                className="remove-button"
-                onClick={() => handleRemoveCapability(index)}
-              >
-                ×
-              </button>
-            </div>
-          ))}
-          <div className="add-capability">
+        
+        <div style={{ marginBottom: '20px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: 600, color: '#251f18' }}>能力</label>
+          <div style={{ marginBottom: '8px' }}>
+            {editedNode?.data.capabilities.map((capability, index) => (
+              <div key={index} style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '6px 10px',
+                backgroundColor: '#fff1e0',
+                borderRadius: '8px',
+                marginBottom: '4px',
+                fontSize: '14px',
+              }}>
+                <span>{capability}</span>
+                <button
+                  type="button"
+                  onClick={() => handleRemoveCapability(index)}
+                  style={{
+                    background: 'none',
+                    border: 'none',
+                    color: '#b3562d',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    lineHeight: '1',
+                    padding: '0 4px',
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+          <div style={{ display: 'flex', gap: '8px' }}>
             <input
               type="text"
               value={newCapability}
               onChange={(e) => setNewCapability(e.target.value)}
               placeholder="添加能力"
+              style={{
+                flex: '1',
+                padding: '8px 12px',
+                border: '1px solid #d9c8b0',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontFamily: 'inherit',
+              }}
             />
             <button
               type="button"
-              className="add-button"
               onClick={handleAddCapability}
+              style={{
+                padding: '8px 16px',
+                backgroundColor: '#b3562d',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                fontSize: '14px',
+                fontFamily: 'inherit',
+              }}
             >
               添加
             </button>
           </div>
         </div>
-      </div>
-      <div className="inspector-section">
-        <h4>位置</h4>
-        <div className="form-row">
-          <div className="form-group">
-            <label>X</label>
-            <input
-              type="number"
-              value={editedNode?.position.x || 0}
-              onChange={(e) => handleUpdate('position.x', parseFloat(e.target.value))}
-            />
-          </div>
-          <div className="form-group">
-            <label>Y</label>
-            <input
-              type="number"
-              value={editedNode?.position.y || 0}
-              onChange={(e) => handleUpdate('position.y', parseFloat(e.target.value))}
-            />
+        
+        <div style={{ marginBottom: '24px' }}>
+          <label style={{ display: 'block', marginBottom: '6px', fontSize: '14px', fontWeight: 600, color: '#251f18' }}>位置</label>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <div style={{ flex: '1' }}>
+              <input
+                type="number"
+                value={editedNode?.position.x || 0}
+                onChange={(e) => handleUpdate('position.x', parseFloat(e.target.value))}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '1px solid #d9c8b0',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                }}
+              />
+            </div>
+            <div style={{ flex: '1' }}>
+              <input
+                type="number"
+                value={editedNode?.position.y || 0}
+                onChange={(e) => handleUpdate('position.y', parseFloat(e.target.value))}
+                style={{
+                  width: '100%',
+                  padding: '8px 12px',
+                  border: '1px solid #d9c8b0',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontFamily: 'inherit',
+                }}
+              />
+            </div>
           </div>
         </div>
-      </div>
-      <div className="inspector-actions">
-        <button
-          type="button"
-          className="button"
-          onClick={handleSave}
-        >
-          保存
-        </button>
-        <button
-          type="button"
-          className="button danger"
-          onClick={handleDelete}
-        >
-          删除
-        </button>
+        
+        <div style={{ display: 'flex', gap: '12px' }}>
+          <button
+            type="button"
+            onClick={handleSave}
+            style={{
+              flex: '1',
+              padding: '10px 16px',
+              backgroundColor: '#b3562d',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontFamily: 'inherit',
+              fontWeight: 500,
+            }}
+          >
+            保存
+          </button>
+          <button
+            type="button"
+            onClick={handleDelete}
+            style={{
+              flex: '1',
+              padding: '10px 16px',
+              backgroundColor: '#f44336',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '14px',
+              fontFamily: 'inherit',
+              fontWeight: 500,
+            }}
+          >
+            删除
+          </button>
+        </div>
       </div>
     </div>
   );

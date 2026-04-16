@@ -5,22 +5,16 @@ import ReactFlowWorkflowCanvas from '@/components/reactflow-workflow-canvas';
 import NodeLibrary from '@/components/node-library';
 import NodeInspector from '@/components/node-inspector';
 import Toolbar from '@/components/workflow-toolbar';
-import { getWorkflows, createWorkflow, updateWorkflow, runWorkflow, getMemories, createMemory, updateMemory, deleteMemory } from '@/lib/api';
-import MemoryManagement from '@/components/memory-management';
-import TeamRelationships from '@/components/team-relationships';
+import { getWorkflows, createWorkflow, updateWorkflow, runWorkflow } from '@/lib/api';
 
 export default function OrchestrationPage() {
   const [nodes, setNodes] = useState<any[]>([]);
   const [edges, setEdges] = useState<any[]>([]);
   const [selectedNode, setSelectedNode] = useState<any>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const [workflowId, setWorkflowId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [memories, setMemories] = useState<any[]>([]);
-  const [relationships, setRelationships] = useState<any[]>([]);
 
   // 加载工作流数据
   useEffect(() => {
@@ -174,21 +168,7 @@ export default function OrchestrationPage() {
     loadWorkflows();
   }, []);
 
-  // 加载记忆数据
-  useEffect(() => {
-    const loadMemories = async () => {
-      try {
-        const response = await getMemories();
-        if (response.memories) {
-          setMemories(response.memories);
-        }
-      } catch (error) {
-        console.error('加载记忆失败:', error);
-      }
-    };
 
-    loadMemories();
-  }, []);
 
   // 保存工作流到后端
   useEffect(() => {
@@ -274,45 +254,7 @@ export default function OrchestrationPage() {
     }
   }, [workflowId]);
 
-  const handleAddMemory = useCallback(async (memoryData: any) => {
-    try {
-      const newMemory = await createMemory(memoryData);
-      setMemories([...memories, newMemory]);
-    } catch (error) {
-      console.error('添加记忆失败:', error);
-      alert('添加记忆失败');
-    }
-  }, [memories]);
 
-  const handleUpdateMemory = useCallback(async (memory: any) => {
-    try {
-      await updateMemory(memory.id, memory);
-      setMemories(memories.map(m => m.id === memory.id ? memory : m));
-    } catch (error) {
-      console.error('更新记忆失败:', error);
-      alert('更新记忆失败');
-    }
-  }, [memories]);
-
-  const handleDeleteMemory = useCallback(async (memoryId: string) => {
-    try {
-      await deleteMemory(memoryId);
-      setMemories(memories.filter(m => m.id !== memoryId));
-    } catch (error) {
-      console.error('删除记忆失败:', error);
-      alert('删除记忆失败');
-    }
-  }, [memories]);
-
-  const handleAddRelationship = useCallback((relationship: any) => {
-    setRelationships([...relationships, relationship]);
-  }, [relationships]);
-
-  const handleDeleteRelationship = useCallback((index: number) => {
-    const newRelationships = [...relationships];
-    newRelationships.splice(index, 1);
-    setRelationships(newRelationships);
-  }, [relationships]);
 
   return (
     <ReactFlowProvider>
@@ -339,31 +281,6 @@ export default function OrchestrationPage() {
               node={selectedNode}
               onUpdate={handleNodeUpdate}
               onDelete={handleNodeDelete}
-            />
-            <MemoryManagement
-              agents={nodes.map(node => ({
-                id: node.id,
-                name: node.data.name,
-                type: node.type,
-                description: node.data.description,
-                capabilities: node.data.capabilities,
-              }))}
-              memories={memories}
-              onAddMemory={handleAddMemory}
-              onUpdateMemory={handleUpdateMemory}
-              onDeleteMemory={handleDeleteMemory}
-            />
-            <TeamRelationships
-              agents={nodes.map(node => ({
-                id: node.id,
-                name: node.data.name,
-                type: node.type,
-                description: node.data.description,
-                capabilities: node.data.capabilities,
-              }))}
-              relationships={relationships}
-              onAddRelationship={handleAddRelationship}
-              onDeleteRelationship={handleDeleteRelationship}
             />
           </div>
         </div>
