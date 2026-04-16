@@ -320,6 +320,50 @@ label {
   transition: all 0.1s ease-out;
 }
 
+/* Custom Node Animations */
+.custom-node {
+  transition: all 0.2s ease;
+}
+
+.custom-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(84, 51, 23, 0.15) !important;
+}
+
+.custom-node.selected {
+  transform: translateY(-2px);
+  box-shadow: 0 0 0 3px rgba(179, 86, 45, 0.2), 0 6px 16px rgba(84, 51, 23, 0.15) !important;
+}
+
+/* React Flow Dragging Animations */
+.react-flow__node-dragging {
+  opacity: 0.8;
+  transform: scale(1.02);
+  transition: all 0.15s ease;
+}
+
+.react-flow__node-resizing {
+  transition: none;
+}
+
+.react-flow__edge {
+  transition: stroke 0.2s ease, stroke-width 0.2s ease;
+}
+
+.react-flow__edge:hover {
+  stroke-width: 3px;
+}
+
+.react-flow__edge.selected {
+  stroke-width: 3px;
+  stroke: var(--accent);
+}
+
+/* Background Grid Animation */
+.canvas-grid {
+  transition: opacity 0.3s ease;
+}
+
 .node-icon {
   width: 32px;
   height: 32px;

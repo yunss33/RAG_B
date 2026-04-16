@@ -54,7 +54,16 @@ export default function NodeLibrary({ onAddNode }: NodeLibraryProps) {
   const handleDragStart = useCallback((e: React.DragEvent, type: string) => {
     e.dataTransfer.setData('text/plain', type);
     e.dataTransfer.effectAllowed = 'copy';
+    // 添加拖动时的视觉效果
+    e.currentTarget.style.opacity = '0.5';
+    e.currentTarget.style.transform = 'scale(0.95)';
     console.log('Drag started for node type:', type);
+  }, []);
+
+  const handleDragEnd = useCallback((e: React.DragEvent) => {
+    // 恢复视觉效果
+    e.currentTarget.style.opacity = '1';
+    e.currentTarget.style.transform = 'scale(1)';
   }, []);
 
   return (
@@ -70,6 +79,7 @@ export default function NodeLibrary({ onAddNode }: NodeLibraryProps) {
                 className="node-item"
                 draggable
                 onDragStart={(e) => handleDragStart(e, nodeType.type)}
+                onDragEnd={handleDragEnd}
                 style={{ borderLeftColor: nodeType.color }}
               >
                 <div className="node-icon" style={{ backgroundColor: nodeType.color }}>

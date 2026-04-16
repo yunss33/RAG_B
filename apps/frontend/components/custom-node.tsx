@@ -68,7 +68,9 @@ export default function CustomNode({ data, nodeId, nodeStatus }: CustomNodeProps
           boxShadow: '0 4px 12px rgba(84, 51, 23, 0.1)',
           minWidth: 180,
           maxWidth: 220,
+          transition: 'all 0.2s ease',
         }}
+        className="custom-node"
       >
         <div
           style={{
