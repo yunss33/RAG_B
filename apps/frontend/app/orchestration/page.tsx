@@ -1,6 +1,6 @@
 'use client';
 import { useState, useRef, useCallback, useEffect } from 'react';
-import WorkflowCanvas from '@/components/workflow-canvas';
+import ReactFlowWorkflowCanvas from '@/components/reactflow-workflow-canvas';
 import NodeLibrary from '@/components/node-library';
 import NodeInspector from '@/components/node-inspector';
 import Toolbar from '@/components/workflow-toolbar';
@@ -20,8 +20,6 @@ export default function OrchestrationPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [memories, setMemories] = useState<any[]>([]);
   const [relationships, setRelationships] = useState<any[]>([]);
-
-  const canvasRef = useRef<HTMLDivElement>(null);
 
   // 加载工作流数据
   useEffect(() => {
@@ -320,8 +318,7 @@ export default function OrchestrationPage() {
       <Toolbar zoom={zoom} onZoom={handleZoom} onRunWorkflow={handleRunWorkflow} />
       <div className="workflow-container">
         <NodeLibrary onAddNode={handleNodeAdd} />
-        <WorkflowCanvas
-          ref={canvasRef}
+        <ReactFlowWorkflowCanvas
           nodes={nodes}
           edges={edges}
           selectedNode={selectedNode}
