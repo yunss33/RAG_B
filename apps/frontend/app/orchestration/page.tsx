@@ -1,142 +1,138 @@
 'use client';
-import { useState } from 'react';
-import AgentEditor from '@/components/agent-editor';
-import TeamRelationships from '@/components/team-relationships';
-import MemoryManagement from '@/components/memory-management';
-import AgentFlow from '@/components/agent-flow';
+import { useState, useRef, useCallback } from 'react';
+import WorkflowCanvas from '@/components/workflow-canvas';
+import NodeLibrary from '@/components/node-library';
+import NodeInspector from '@/components/node-inspector';
+import Toolbar from '@/components/workflow-toolbar';
 
 export default function OrchestrationPage() {
-  const [agents, setAgents] = useState<any[]>([
+  const [nodes, setNodes] = useState<any[]>([
     {
       id: '1',
-      name: '招标解析智能体',
       type: 'analyzer',
-      description: '分析招标文件，提取关键要求',
-      capabilities: ['文档解析', '要求提取', '关键词识别'],
+      position: { x: 100, y: 100 },
+      data: {
+        name: '招标解析智能体',
+        description: '分析招标文件，提取关键要求',
+        capabilities: ['文档解析', '要求提取', '关键词识别'],
+      },
     },
     {
       id: '2',
-      name: '章节规划智能体',
       type: 'planner',
-      description: '根据招标要求生成标书章节结构',
-      capabilities: ['结构设计', '内容规划', '逻辑梳理'],
+      position: { x: 300, y: 100 },
+      data: {
+        name: '章节规划智能体',
+        description: '根据招标要求生成标书章节结构',
+        capabilities: ['结构设计', '内容规划', '逻辑梳理'],
+      },
     },
     {
       id: '3',
-      name: '章节写作智能体',
       type: 'writer',
-      description: '自动生成各章节内容',
-      capabilities: ['内容生成', '格式规范', '专业术语'],
+      position: { x: 500, y: 100 },
+      data: {
+        name: '章节写作智能体',
+        description: '自动生成各章节内容',
+        capabilities: ['内容生成', '格式规范', '专业术语'],
+      },
     },
   ]);
 
-  const [relationships, setRelationships] = useState<any[]>([
+  const [edges, setEdges] = useState<any[]>([
     {
+      id: 'e1-2',
       source: '1',
       target: '2',
-      type: 'data',
-      description: '传递解析结果',
+      label: '传递解析结果',
     },
     {
+      id: 'e2-3',
       source: '2',
       target: '3',
-      type: 'instruction',
-      description: '传递章节规划',
+      label: '传递章节规划',
     },
   ]);
 
-  const [memories, setMemories] = useState<any[]>([
-    {
-      id: '1',
-      name: '招标要求记忆',
-      type: 'shared',
-      content: '存储招标解析的关键要求',
-      access: ['1', '2', '3'],
-    },
-  ]);
+  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [pan, setPan] = useState({ x: 0, y: 0 });
 
-  const handleAddAgent = (agent: any) => {
-    setAgents([...agents, { ...agent, id: (agents.length + 1).toString() }]);
-  };
+  const canvasRef = useRef<HTMLDivElement>(null);
 
-  const handleUpdateAgent = (updatedAgent: any) => {
-    setAgents(agents.map(agent => agent.id === updatedAgent.id ? updatedAgent : agent));
-  };
+  const handleNodeSelect = useCallback((node: any) => {
+    setSelectedNode(node);
+  }, []);
 
-  const handleDeleteAgent = (agentId: string) => {
-    setAgents(agents.filter(agent => agent.id !== agentId));
-    setRelationships(relationships.filter(rel => rel.source !== agentId && rel.target !== agentId));
-    setMemories(memories.map(memory => ({
-      ...memory,
-      access: memory.access.filter((id: string) => id !== agentId),
-    })));
-  };
+  const handleNodeAdd = useCallback((type: string, position: { x: number; y: number }) => {
+    const newNode = {
+      id: (nodes.length + 1).toString(),
+      type,
+      position,
+      data: {
+        name: `${type}智能体`,
+        description: '',
+        capabilities: [],
+      },
+    };
+    setNodes([...nodes, newNode]);
+  }, [nodes]);
 
-  const handleAddRelationship = (relationship: any) => {
-    setRelationships([...relationships, relationship]);
-  };
+  const handleNodeUpdate = useCallback((updatedNode: any) => {
+    setNodes(nodes.map(node => node.id === updatedNode.id ? updatedNode : node));
+  }, [nodes]);
 
-  const handleDeleteRelationship = (index: number) => {
-    setRelationships(relationships.filter((_, i) => i !== index));
-  };
+  const handleNodeDelete = useCallback((nodeId: string) => {
+    setNodes(nodes.filter(node => node.id !== nodeId));
+    setEdges(edges.filter(edge => edge.source !== nodeId && edge.target !== nodeId));
+    if (selectedNode && selectedNode.id === nodeId) {
+      setSelectedNode(null);
+    }
+  }, [nodes, edges, selectedNode]);
 
-  const handleAddMemory = (memory: any) => {
-    setMemories([...memories, { ...memory, id: (memories.length + 1).toString() }]);
-  };
+  const handleEdgeAdd = useCallback((edge: any) => {
+    setEdges([...edges, edge]);
+  }, [edges]);
 
-  const handleUpdateMemory = (updatedMemory: any) => {
-    setMemories(memories.map(memory => memory.id === updatedMemory.id ? updatedMemory : memory));
-  };
+  const handleEdgeDelete = useCallback((edgeId: string) => {
+    setEdges(edges.filter(edge => edge.id !== edgeId));
+  }, [edges]);
 
-  const handleDeleteMemory = (memoryId: string) => {
-    setMemories(memories.filter(memory => memory.id !== memoryId));
-  };
+  const handleZoom = useCallback((newZoom: number) => {
+    setZoom(newZoom);
+  }, []);
+
+  const handlePan = useCallback((newPan: { x: number; y: number }) => {
+    setPan(newPan);
+  }, []);
 
   return (
-    <div className="grid">
-      <section className="panel">
-        <h2>智能体编排工作台</h2>
-        <p className="muted">创建、管理和编排多个智能体，设置它们之间的关系和共享记忆</p>
-      </section>
-
-      <section className="panel">
-        <h3>智能体管理</h3>
-        <AgentEditor
-          agents={agents}
-          onAddAgent={handleAddAgent}
-          onUpdateAgent={handleUpdateAgent}
-          onDeleteAgent={handleDeleteAgent}
+    <div className="orchestration-workspace">
+      <Toolbar zoom={zoom} onZoom={handleZoom} />
+      <div className="workflow-container">
+        <NodeLibrary onAddNode={handleNodeAdd} />
+        <WorkflowCanvas
+          ref={canvasRef}
+          nodes={nodes}
+          edges={edges}
+          selectedNode={selectedNode}
+          onNodeSelect={handleNodeSelect}
+          onNodeUpdate={handleNodeUpdate}
+          onNodeDelete={handleNodeDelete}
+          onEdgeAdd={handleEdgeAdd}
+          onEdgeDelete={handleEdgeDelete}
+          zoom={zoom}
+          pan={pan}
+          onPan={handlePan}
         />
-      </section>
-
-      <section className="panel">
-        <h3>智能体关系</h3>
-        <TeamRelationships
-          agents={agents}
-          relationships={relationships}
-          onAddRelationship={handleAddRelationship}
-          onDeleteRelationship={handleDeleteRelationship}
+        <NodeInspector
+          node={selectedNode}
+          onUpdate={handleNodeUpdate}
+          onDelete={handleNodeDelete}
         />
-      </section>
-
-      <section className="panel">
-        <h3>团队记忆</h3>
-        <MemoryManagement
-          agents={agents}
-          memories={memories}
-          onAddMemory={handleAddMemory}
-          onUpdateMemory={handleUpdateMemory}
-          onDeleteMemory={handleDeleteMemory}
-        />
-      </section>
-
-      <section className="panel full-width">
-        <h3>智能体工作流</h3>
-        <AgentFlow
-          agents={agents}
-          relationships={relationships}
-        />
-      </section>
+      </div>
     </div>
   );
 }
