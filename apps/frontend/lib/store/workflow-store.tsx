@@ -18,6 +18,19 @@ interface ExecutionHistoryItem {
   }[];
 }
 
+// 定义模式类型
+type Mode = 'workflow' | 'orchestration' | 'multi-agent';
+
+// 定义智能体类型
+interface Agent {
+  id: string;
+  name: string;
+  type: string;
+  description: string;
+  isMain: boolean;
+  capabilities: string[];
+}
+
 // 定义状态类型
 interface WorkflowState {
   nodes: any[];
@@ -31,6 +44,9 @@ interface WorkflowState {
   nodeStatuses: Record<string, NodeStatus>;
   executionHistory: ExecutionHistoryItem[];
   currentExecutionId: string | null;
+  mode: Mode;
+  agents: Agent[];
+  selectedAgent: Agent | null;
 }
 
 // 定义动作类型
@@ -52,7 +68,13 @@ type WorkflowAction =
   | { type: 'SET_ALL_NODE_STATUS'; payload: NodeStatus }
   | { type: 'START_EXECUTION'; payload: string }
   | { type: 'END_EXECUTION'; payload: { executionId: string; status: 'success' | 'error' } }
-  | { type: 'ADD_EXECUTION_HISTORY'; payload: ExecutionHistoryItem };
+  | { type: 'ADD_EXECUTION_HISTORY'; payload: ExecutionHistoryItem }
+  | { type: 'SET_MODE'; payload: Mode }
+  | { type: 'SET_AGENTS'; payload: Agent[] }
+  | { type: 'ADD_AGENT'; payload: Agent }
+  | { type: 'UPDATE_AGENT'; payload: Agent }
+  | { type: 'DELETE_AGENT'; payload: string }
+  | { type: 'SET_SELECTED_AGENT'; payload: Agent | null };
 
 // 初始状态
 const initialState: WorkflowState = {
@@ -67,6 +89,42 @@ const initialState: WorkflowState = {
   nodeStatuses: {},
   executionHistory: [],
   currentExecutionId: null,
+  mode: 'workflow',
+  agents: [
+    {
+      id: '1',
+      name: '总协调智能体',
+      type: 'coordinator',
+      description: '负责协调其他智能体的工作，分配任务和整合结果',
+      isMain: true,
+      capabilities: ['任务分配', '结果整合', '流程协调'],
+    },
+    {
+      id: '2',
+      name: '分析智能体',
+      type: 'analyzer',
+      description: '分析数据和文档，提取关键信息',
+      isMain: false,
+      capabilities: ['数据解析', '信息提取', '模式识别'],
+    },
+    {
+      id: '3',
+      name: '规划智能体',
+      type: 'planner',
+      description: '制定计划和策略，优化工作流程',
+      isMain: false,
+      capabilities: ['计划制定', '策略优化', '资源分配'],
+    },
+    {
+      id: '4',
+      name: '执行智能体',
+      type: 'general',
+      description: '执行具体任务，完成工作流程中的操作',
+      isMain: false,
+      capabilities: ['任务执行', '操作处理', '结果生成'],
+    },
+  ],
+  selectedAgent: null,
 };
 
 // Reducer 函数
@@ -138,6 +196,37 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
         ...state,
         executionHistory: [action.payload, ...state.executionHistory],
       };
+    case 'SET_MODE':
+      return {
+        ...state,
+        mode: action.payload,
+      };
+    case 'SET_AGENTS':
+      return {
+        ...state,
+        agents: action.payload,
+      };
+    case 'ADD_AGENT':
+      return {
+        ...state,
+        agents: [...state.agents, action.payload],
+      };
+    case 'UPDATE_AGENT':
+      return {
+        ...state,
+        agents: state.agents.map(agent => agent.id === action.payload.id ? action.payload : agent),
+      };
+    case 'DELETE_AGENT':
+      return {
+        ...state,
+        agents: state.agents.filter(agent => agent.id !== action.payload),
+        selectedAgent: state.selectedAgent?.id === action.payload ? null : state.selectedAgent,
+      };
+    case 'SET_SELECTED_AGENT':
+      return {
+        ...state,
+        selectedAgent: action.payload,
+      };
     default:
       return state;
   }
@@ -161,6 +250,11 @@ interface WorkflowContextType {
   setNodeStatus: (nodeId: string, status: NodeStatus) => void;
   setAllNodeStatus: (status: NodeStatus) => void;
   getNodeStatus: (nodeId: string) => NodeStatus;
+  setMode: (mode: Mode) => void;
+  addAgent: (agent: Agent) => void;
+  updateAgent: (agent: Agent) => void;
+  deleteAgent: (agentId: string) => void;
+  selectAgent: (agent: Agent | null) => void;
 }
 
 // 创建 Context
@@ -418,6 +512,31 @@ export function WorkflowProvider({ children }: WorkflowProviderProps) {
     return state.nodeStatuses[nodeId] || 'idle';
   }, [state.nodeStatuses]);
 
+  // 设置模式
+  const setMode = useCallback((mode: Mode) => {
+    dispatch({ type: 'SET_MODE', payload: mode });
+  }, []);
+
+  // 添加智能体
+  const addAgent = useCallback((agent: Agent) => {
+    dispatch({ type: 'ADD_AGENT', payload: agent });
+  }, []);
+
+  // 更新智能体
+  const updateAgent = useCallback((agent: Agent) => {
+    dispatch({ type: 'UPDATE_AGENT', payload: agent });
+  }, []);
+
+  // 删除智能体
+  const deleteAgent = useCallback((agentId: string) => {
+    dispatch({ type: 'DELETE_AGENT', payload: agentId });
+  }, []);
+
+  // 选择智能体
+  const selectAgent = useCallback((agent: Agent | null) => {
+    dispatch({ type: 'SET_SELECTED_AGENT', payload: agent });
+  }, []);
+
   // 添加节点
   const addNode = useCallback((type: string, position: { x: number; y: number }) => {
     console.log('Adding node:', { type, position });
@@ -488,6 +607,11 @@ export function WorkflowProvider({ children }: WorkflowProviderProps) {
     setNodeStatus,
     setAllNodeStatus,
     getNodeStatus,
+    setMode,
+    addAgent,
+    updateAgent,
+    deleteAgent,
+    selectAgent,
   };
 
   return (

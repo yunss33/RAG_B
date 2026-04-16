@@ -781,6 +781,241 @@ label {
   font-size: 0.75rem;
 }
 
+/* Mode Switcher Styles */
+.mode-switcher {
+  margin-bottom: 1rem;
+}
+
+.mode-tabs {
+  display: flex;
+  gap: 0.5rem;
+  background: var(--panel-alt);
+  padding: 4px;
+  border-radius: 12px;
+}
+
+.mode-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--muted);
+}
+
+.mode-tab:hover {
+  background: rgba(179, 86, 45, 0.1);
+  color: var(--ink);
+}
+
+.mode-tab.active {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 2px 4px rgba(84, 51, 23, 0.2);
+}
+
+.mode-icon {
+  font-size: 1rem;
+}
+
+/* Multi Agent View Styles */
+.multi-agent-view {
+  padding: 1rem;
+  width: 100%;
+}
+
+.multi-agent-view h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.agent-card {
+  background: var(--panel);
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.agent-card:hover {
+  box-shadow: 0 4px 12px rgba(84, 51, 23, 0.1);
+  transform: translateY(-2px);
+}
+
+.agent-card.selected {
+  box-shadow: 0 0 0 2px rgba(179, 86, 45, 0.2);
+}
+
+.agent-card.main-agent {
+  background: var(--panel-alt);
+  margin-bottom: 1.5rem;
+}
+
+.agent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.agent-header h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0;
+}
+
+.agent-type {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.agent-card h5 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.agent-description {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.agent-indicator {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+}
+
+.main-badge {
+  display: inline-block;
+  padding: 0.25rem 0.5rem;
+  background: var(--accent);
+  color: white;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.other-agents h4 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--muted);
+  margin: 0 0 0.75rem 0;
+}
+
+.agent-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+}
+
+/* Multi Agent Mode Styles */
+.multi-agent-main {
+  flex: 1;
+  padding: 1rem;
+  overflow-y: auto;
+}
+
+.agent-details {
+  padding: 1rem;
+  width: 100%;
+}
+
+.agent-details h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.agent-detail-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 1rem;
+}
+
+.agent-detail-card h4 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+}
+
+.agent-detail-card .agent-type {
+  font-size: 0.875rem;
+  color: var(--muted);
+  margin: 0 0 0.75rem 0;
+}
+
+.agent-detail-card .agent-description {
+  font-size: 0.875rem;
+  color: var(--ink);
+  margin: 0 0 1rem 0;
+  line-height: 1.4;
+}
+
+.agent-capabilities {
+  margin-bottom: 1rem;
+}
+
+.agent-capabilities h5 {
+  font-size: 0.875rem;
+  font-weight: 600;
+  margin: 0 0 0.5rem 0;
+  color: var(--muted);
+}
+
+.capabilities-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.capability-tag {
+  padding: 0.25rem 0.75rem;
+  background: var(--panel-alt);
+  border-radius: 999px;
+  font-size: 0.75rem;
+  color: var(--ink);
+}
+
+.agent-role {
+  margin-top: 1rem;
+}
+
+.role-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  background: var(--muted);
+  color: white;
+}
+
+.role-badge.main {
+  background: var(--accent);
+}
+
 /* Execution History Styles */
 .execution-history {
   padding: 1rem;
