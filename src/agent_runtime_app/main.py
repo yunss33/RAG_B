@@ -17,6 +17,19 @@ from deepbs_common.schemas import (
     RequirementResult,
     ReviewResult,
 )
+from deepbs_common.skill_loader import skill_loader
+
+# 加载Superpowers Plus技能
+superpowers_plus_content = skill_loader.load_superpowers_plus(compressed=True)
+if superpowers_plus_content:
+    print("Successfully loaded Superpowers Plus skill (compressed version)")
+else:
+    print("Superpowers Plus skill not found, trying regular version...")
+    superpowers_plus_content = skill_loader.load_superpowers_plus(compressed=False)
+    if superpowers_plus_content:
+        print("Successfully loaded Superpowers Plus skill (regular version)")
+    else:
+        print("Warning: Superpowers Plus skill not available")
 
 app = FastAPI(title="DeepBS Agent Runtime", version="0.1.0")
 
@@ -54,4 +67,13 @@ async def images(request: AgentRequest) -> ImageSuggestionResult:
 @app.post("/internal/assemble-html", response_model=HtmlAssembleResult)
 async def html(request: AgentRequest) -> HtmlAssembleResult:
     return assemble_html(request.project)
+
+
+@app.get("/internal/skills/superpowers-plus")
+async def get_superpowers_plus() -> dict[str, str]:
+    """获取Superpowers Plus技能内容"""
+    content = skill_loader.load_superpowers_plus(compressed=True)
+    if not content:
+        content = skill_loader.load_superpowers_plus(compressed=False)
+    return {"content": content or "Superpowers Plus skill not available"}
 
