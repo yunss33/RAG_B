@@ -135,13 +135,13 @@ export default function ReactFlowWorkflowCanvas({
     const type = event.dataTransfer.getData('text/plain');
     if (!type) return;
 
-    const position = reactFlow.screenToFlowPosition({
-      x: event.clientX,
-      y: event.clientY,
-    });
+    // 计算画布位置
+    const rect = event.currentTarget.getBoundingClientRect();
+    const x = event.clientX - rect.left;
+    const y = event.clientY - rect.top;
 
-    onAddNode(type, position);
-  }, [reactFlow, onAddNode]);
+    onAddNode(type, { x, y });
+  }, [onAddNode]);
 
   return (
     <div
