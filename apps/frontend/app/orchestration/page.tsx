@@ -5,6 +5,7 @@ import ReactFlowWorkflowCanvas from '@/components/reactflow-workflow-canvas';
 import NodeLibrary from '@/components/node-library';
 import NodeInspector from '@/components/node-inspector';
 import Toolbar from '@/components/workflow-toolbar';
+import ExecutionHistory from '@/components/execution-history';
 import { WorkflowProvider, useWorkflow } from '@/lib/store/workflow-store';
 
 // 主页面组件
@@ -60,6 +61,7 @@ function OrchestrationContent() {
           zoom={state.zoom}
           pan={state.pan}
           onPan={setPan}
+          nodeStatuses={state.nodeStatuses}
         />
         <div className="right-panel">
           <NodeInspector
@@ -67,6 +69,7 @@ function OrchestrationContent() {
             onUpdate={updateNode}
             onDelete={deleteNode}
           />
+          <ExecutionHistory history={state.executionHistory} />
         </div>
       </div>
     </div>

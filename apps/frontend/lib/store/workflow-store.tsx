@@ -2,6 +2,22 @@
 import { createContext, useContext, useCallback, useReducer, ReactNode } from 'react';
 import { getWorkflows, createWorkflow, updateWorkflow, runWorkflow } from '../api';
 
+// 定义节点状态类型
+type NodeStatus = 'idle' | 'running' | 'success' | 'error';
+
+// 定义执行历史项类型
+interface ExecutionHistoryItem {
+  id: string;
+  timestamp: number;
+  status: 'success' | 'error';
+  nodes: {
+    id: string;
+    status: NodeStatus;
+    result?: any;
+    error?: string;
+  }[];
+}
+
 // 定义状态类型
 interface WorkflowState {
   nodes: any[];
@@ -12,6 +28,9 @@ interface WorkflowState {
   workflowId: string | null;
   isLoading: boolean;
   error: string | null;
+  nodeStatuses: Record<string, NodeStatus>;
+  executionHistory: ExecutionHistoryItem[];
+  currentExecutionId: string | null;
 }
 
 // 定义动作类型
@@ -28,7 +47,12 @@ type WorkflowAction =
   | { type: 'UPDATE_NODE'; payload: any }
   | { type: 'DELETE_NODE'; payload: string }
   | { type: 'ADD_EDGE'; payload: any }
-  | { type: 'DELETE_EDGE'; payload: string };
+  | { type: 'DELETE_EDGE'; payload: string }
+  | { type: 'SET_NODE_STATUS'; payload: { nodeId: string; status: NodeStatus } }
+  | { type: 'SET_ALL_NODE_STATUS'; payload: NodeStatus }
+  | { type: 'START_EXECUTION'; payload: string }
+  | { type: 'END_EXECUTION'; payload: { executionId: string; status: 'success' | 'error' } }
+  | { type: 'ADD_EXECUTION_HISTORY'; payload: ExecutionHistoryItem };
 
 // 初始状态
 const initialState: WorkflowState = {
@@ -40,6 +64,9 @@ const initialState: WorkflowState = {
   workflowId: null,
   isLoading: true,
   error: null,
+  nodeStatuses: {},
+  executionHistory: [],
+  currentExecutionId: null,
 };
 
 // Reducer 函数
@@ -79,6 +106,38 @@ function workflowReducer(state: WorkflowState, action: WorkflowAction): Workflow
       return { ...state, edges: [...state.edges, action.payload] };
     case 'DELETE_EDGE':
       return { ...state, edges: state.edges.filter(edge => edge.id !== action.payload) };
+    case 'SET_NODE_STATUS':
+      return {
+        ...state,
+        nodeStatuses: {
+          ...state.nodeStatuses,
+          [action.payload.nodeId]: action.payload.status,
+        },
+      };
+    case 'SET_ALL_NODE_STATUS':
+      const newNodeStatuses: Record<string, NodeStatus> = {};
+      state.nodes.forEach(node => {
+        newNodeStatuses[node.id] = action.payload;
+      });
+      return {
+        ...state,
+        nodeStatuses: newNodeStatuses,
+      };
+    case 'START_EXECUTION':
+      return {
+        ...state,
+        currentExecutionId: action.payload,
+      };
+    case 'END_EXECUTION':
+      return {
+        ...state,
+        currentExecutionId: null,
+      };
+    case 'ADD_EXECUTION_HISTORY':
+      return {
+        ...state,
+        executionHistory: [action.payload, ...state.executionHistory],
+      };
     default:
       return state;
   }
@@ -99,6 +158,9 @@ interface WorkflowContextType {
   selectNode: (node: any) => void;
   setZoom: (zoom: number) => void;
   setPan: (pan: { x: number; y: number }) => void;
+  setNodeStatus: (nodeId: string, status: NodeStatus) => void;
+  setAllNodeStatus: (status: NodeStatus) => void;
+  getNodeStatus: (nodeId: string) => NodeStatus;
 }
 
 // 创建 Context
@@ -297,14 +359,64 @@ export function WorkflowProvider({ children }: WorkflowProviderProps) {
     if (!state.workflowId) return;
     
     try {
-      await runWorkflow(state.workflowId);
-      alert('工作流已启动');
+      // 生成执行ID
+      const executionId = Date.now().toString();
+      
+      // 开始执行
+      dispatch({ type: 'START_EXECUTION', payload: executionId });
+      dispatch({ type: 'SET_ALL_NODE_STATUS', payload: 'idle' });
+      
+      // 模拟工作流执行过程
+      const executionNodes = state.nodes.map(node => ({
+        id: node.id,
+        status: 'running' as NodeStatus,
+      }));
+      
+      // 模拟每个节点的执行
+      for (const node of state.nodes) {
+        dispatch({ type: 'SET_NODE_STATUS', payload: { nodeId: node.id, status: 'running' } });
+        // 模拟执行延迟
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        dispatch({ type: 'SET_NODE_STATUS', payload: { nodeId: node.id, status: 'success' } });
+      }
+      
+      // 结束执行
+      dispatch({ type: 'END_EXECUTION', payload: { executionId, status: 'success' } });
+      
+      // 添加执行历史
+      const executionHistoryItem: ExecutionHistoryItem = {
+        id: executionId,
+        timestamp: Date.now(),
+        status: 'success',
+        nodes: state.nodes.map(node => ({
+          id: node.id,
+          status: 'success',
+        })),
+      };
+      dispatch({ type: 'ADD_EXECUTION_HISTORY', payload: executionHistoryItem });
+      
+      alert('工作流执行成功');
     } catch (error) {
       console.error('运行工作流失败:', error);
       dispatch({ type: 'SET_ERROR', payload: '运行工作流失败' });
       alert('运行工作流失败');
     }
-  }, [state.workflowId]);
+  }, [state.workflowId, state.nodes]);
+
+  // 设置节点状态
+  const setNodeStatus = useCallback((nodeId: string, status: NodeStatus) => {
+    dispatch({ type: 'SET_NODE_STATUS', payload: { nodeId, status } });
+  }, []);
+
+  // 设置所有节点状态
+  const setAllNodeStatus = useCallback((status: NodeStatus) => {
+    dispatch({ type: 'SET_ALL_NODE_STATUS', payload: status });
+  }, []);
+
+  // 获取节点状态
+  const getNodeStatus = useCallback((nodeId: string) => {
+    return state.nodeStatuses[nodeId] || 'idle';
+  }, [state.nodeStatuses]);
 
   // 添加节点
   const addNode = useCallback((type: string, position: { x: number; y: number }) => {
@@ -373,6 +485,9 @@ export function WorkflowProvider({ children }: WorkflowProviderProps) {
     selectNode,
     setZoom,
     setPan,
+    setNodeStatus,
+    setAllNodeStatus,
+    getNodeStatus,
   };
 
   return (

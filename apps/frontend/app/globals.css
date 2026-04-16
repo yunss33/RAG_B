@@ -781,6 +781,78 @@ label {
   font-size: 0.75rem;
 }
 
+/* Execution History Styles */
+.execution-history {
+  padding: 1rem;
+  width: 100%;
+}
+
+.execution-history h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--line);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.history-item {
+  background: var(--panel-alt);
+  border-radius: 12px;
+  padding: 1rem;
+  border-left: 3px solid var(--accent);
+}
+
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+}
+
+.history-time {
+  font-size: 0.875rem;
+  color: var(--muted);
+}
+
+.history-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.history-nodes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.history-node {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.25rem 0.75rem;
+  background: var(--panel);
+  border-radius: 999px;
+  font-size: 0.75rem;
+}
+
+.node-status {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
+}
+
 /* Responsive adjustments */
 @media (max-width: 1200px) {
   .node-library {

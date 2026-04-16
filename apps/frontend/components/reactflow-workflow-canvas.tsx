@@ -53,6 +53,7 @@ interface ReactFlowWorkflowCanvasProps {
   zoom: number;
   pan: { x: number; y: number };
   onPan: (pan: { x: number; y: number }) => void;
+  nodeStatuses?: Record<string, string>;
 }
 
 export default function ReactFlowWorkflowCanvas({
@@ -68,6 +69,7 @@ export default function ReactFlowWorkflowCanvas({
   zoom,
   pan,
   onPan,
+  nodeStatuses = {},
 }: ReactFlowWorkflowCanvasProps) {
   const reactFlow = useReactFlow();
 
@@ -82,6 +84,14 @@ export default function ReactFlowWorkflowCanvas({
     },
     selected: selectedNode?.id === node.id,
   }));
+
+  // 定义节点类型配置
+  const nodeTypes = {
+    custom: ({ data, id }: any) => {
+      const nodeStatus = nodeStatuses[id] || 'idle';
+      return <CustomNode data={data} nodeId={id} nodeStatus={nodeStatus} />;
+    },
+  };
 
   // 转换边数据为React Flow格式
   const edges = initialEdges.map(edge => ({

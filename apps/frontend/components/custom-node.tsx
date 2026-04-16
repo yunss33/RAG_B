@@ -11,6 +11,8 @@ interface CustomNodeData {
 
 interface CustomNodeProps {
   data: CustomNodeData;
+  nodeId: string;
+  nodeStatus?: string;
 }
 
 const getAgentTypeColor = (type: string) => {
@@ -25,8 +27,35 @@ const getAgentTypeColor = (type: string) => {
   return colors[type as keyof typeof colors] || '#9E9E9E';
 };
 
-export default function CustomNode({ data }: CustomNodeProps) {
+const getStatusColor = (status?: string) => {
+  switch (status) {
+    case 'running':
+      return '#FF9800';
+    case 'success':
+      return '#4CAF50';
+    case 'error':
+      return '#F44336';
+    default:
+      return '#9E9E9E';
+  }
+};
+
+const getStatusIcon = (status?: string) => {
+  switch (status) {
+    case 'running':
+      return '🔄';
+    case 'success':
+      return '✅';
+    case 'error':
+      return '❌';
+    default:
+      return '⏸';
+  }
+};
+
+export default function CustomNode({ data, nodeId, nodeStatus }: CustomNodeProps) {
   const color = getAgentTypeColor(data.type);
+  const statusColor = getStatusColor(nodeStatus);
 
   return (
     <>
@@ -54,7 +83,21 @@ export default function CustomNode({ data }: CustomNodeProps) {
           }}
         >
           <span style={{ fontWeight: 600, fontSize: 14 }}>{data.name}</span>
-          <span style={{ fontSize: 12, opacity: 0.8 }}>{data.type}</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+            <span style={{ fontSize: 12, opacity: 0.8 }}>{data.type}</span>
+            <span 
+              style={{
+                fontSize: 12,
+                padding: '2px 6px',
+                background: statusColor,
+                borderRadius: 999,
+                color: 'white',
+                fontWeight: 500,
+              }}
+            >
+              {getStatusIcon(nodeStatus)}
+            </span>
+          </div>
         </div>
         <div style={{ padding: 12 }}>
           <p style={{ margin: 0, marginBottom: 8, fontSize: 12, color: '#6a5f52' }}>
