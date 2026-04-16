@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
+from typing import List
 
 import httpx
 from fastapi import FastAPI, File, Form, HTTPException, UploadFile
@@ -19,11 +20,24 @@ from deepbs_common.schemas import (
     ProjectStatusResponse,
     RunResponse,
     SourceFile,
+    # 智能体编排系统模型
+    Workflow,
+    CreateWorkflowRequest,
+    WorkflowResponse,
+    WorkflowListResponse,
+    UpdateWorkflowRequest,
+    Memory,
+    CreateMemoryRequest,
+    MemoryListResponse,
 )
 from deepbs_common.settings import settings
 from deepbs_common.storage import storage
 
 app = FastAPI(title="DeepBS API Gateway", version="0.1.0")
+
+# 工作流存储（临时实现，后续可迁移到数据库）
+workflows: dict[str, Workflow] = {}
+memories: dict[str, Memory] = {}
 
 
 def _project_status(project: Project) -> ProjectStatusResponse:
@@ -47,7 +61,7 @@ async def healthz() -> dict[str, str]:
 
 
 @app.get("/projects")
-async def list_projects() -> list[Project]:
+async def list_projects() -> List[Project]:
     return repository.list_projects()
 
 
@@ -210,3 +224,99 @@ async def serve_object(object_key: str):
     if not path.exists():
         raise HTTPException(status_code=404, detail="object not found")
     return FileResponse(path)
+
+
+# 智能体编排系统 API
+
+@app.get("/workflows", response_model=WorkflowListResponse)
+async def list_workflows() -> WorkflowListResponse:
+    return WorkflowListResponse(workflows=list(workflows.values()))
+
+
+@app.post("/workflows", response_model=WorkflowResponse)
+async def create_workflow(payload: CreateWorkflowRequest) -> WorkflowResponse:
+    workflow = Workflow(
+        name=payload.name,
+        description=payload.description,
+    )
+    workflows[workflow.id] = workflow
+    return WorkflowResponse(workflow_id=workflow.id)
+
+
+@app.get("/workflows/{workflow_id}")
+async def get_workflow(workflow_id: str):
+    if workflow_id not in workflows:
+        raise HTTPException(status_code=404, detail="workflow not found")
+    return workflows[workflow_id]
+
+
+@app.put("/workflows/{workflow_id}")
+async def update_workflow(workflow_id: str, payload: UpdateWorkflowRequest):
+    if workflow_id not in workflows:
+        raise HTTPException(status_code=404, detail="workflow not found")
+    
+    workflow = workflows[workflow_id]
+    if payload.name is not None:
+        workflow.name = payload.name
+    if payload.description is not None:
+        workflow.description = payload.description
+    if payload.agents is not None:
+        workflow.agents = payload.agents
+    if payload.edges is not None:
+        workflow.edges = payload.edges
+    workflow.updated_at = workflow.updated_at  # 触发更新时间
+    
+    workflows[workflow_id] = workflow
+    return workflow
+
+
+@app.delete("/workflows/{workflow_id}")
+async def delete_workflow(workflow_id: str):
+    if workflow_id not in workflows:
+        raise HTTPException(status_code=404, detail="workflow not found")
+    del workflows[workflow_id]
+    return {"message": "workflow deleted successfully"}
+
+
+@app.post("/workflows/{workflow_id}/run")
+async def run_workflow(workflow_id: str):
+    if workflow_id not in workflows:
+        raise HTTPException(status_code=404, detail="workflow not found")
+    
+    workflow = workflows[workflow_id]
+    # 这里可以添加工作流执行逻辑
+    return {"message": "workflow started", "workflow_id": workflow_id}
+
+
+# 记忆管理 API
+
+@app.get("/memories", response_model=MemoryListResponse)
+async def list_memories() -> MemoryListResponse:
+    return MemoryListResponse(memories=list(memories.values()))
+
+
+@app.post("/memories")
+async def create_memory(payload: CreateMemoryRequest):
+    memory = Memory(
+        name=payload.name,
+        type=payload.type,
+        content=payload.content,
+        access=payload.access,
+    )
+    memories[memory.id] = memory
+    return memory
+
+
+@app.get("/memories/{memory_id}")
+async def get_memory(memory_id: str):
+    if memory_id not in memories:
+        raise HTTPException(status_code=404, detail="memory not found")
+    return memories[memory_id]
+
+
+@app.delete("/memories/{memory_id}")
+async def delete_memory(memory_id: str):
+    if memory_id not in memories:
+        raise HTTPException(status_code=404, detail="memory not found")
+    del memories[memory_id]
+    return {"message": "memory deleted successfully"}

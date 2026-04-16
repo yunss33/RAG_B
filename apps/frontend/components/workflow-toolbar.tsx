@@ -4,9 +4,10 @@ import { useCallback } from 'react';
 interface ToolbarProps {
   zoom: number;
   onZoom: (zoom: number) => void;
+  onRunWorkflow: () => void;
 }
 
-export default function Toolbar({ zoom, onZoom }: ToolbarProps) {
+export default function Toolbar({ zoom, onZoom, onRunWorkflow }: ToolbarProps) {
   const handleZoomIn = useCallback(() => {
     onZoom(Math.min(zoom + 0.1, 2));
   }, [zoom, onZoom]);
@@ -71,6 +72,7 @@ export default function Toolbar({ zoom, onZoom }: ToolbarProps) {
         <button
           type="button"
           className="toolbar-button primary"
+          onClick={onRunWorkflow}
           title="运行"
         >
           ▶ 运行

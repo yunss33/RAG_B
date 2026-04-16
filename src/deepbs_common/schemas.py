@@ -220,3 +220,86 @@ class ImageSuggestionResult(BaseModel):
 
 class HtmlAssembleResult(BaseModel):
     html: str
+
+
+# 智能体编排系统模型
+class AgentType(str, Enum):
+    general = "general"
+    analyzer = "analyzer"
+    planner = "planner"
+    writer = "writer"
+    reviewer = "reviewer"
+    coordinator = "coordinator"
+
+
+class Agent(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    name: str
+    type: AgentType
+    description: str | None = None
+    capabilities: list[str] = Field(default_factory=list)
+    position: dict[str, float] = Field(default_factory=lambda: {"x": 100, "y": 100})
+
+
+class Edge(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    source: str
+    target: str
+    label: str | None = None
+
+
+class Workflow(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    name: str
+    description: str | None = None
+    agents: list[Agent] = Field(default_factory=list)
+    edges: list[Edge] = Field(default_factory=list)
+    created_at: str = Field(default_factory=utc_now)
+    updated_at: str = Field(default_factory=utc_now)
+
+
+class CreateWorkflowRequest(BaseModel):
+    name: str
+    description: str | None = None
+
+
+class WorkflowResponse(BaseModel):
+    workflow_id: str
+
+
+class WorkflowListResponse(BaseModel):
+    workflows: list[Workflow]
+
+
+class UpdateWorkflowRequest(BaseModel):
+    name: str | None = None
+    description: str | None = None
+    agents: list[Agent] | None = None
+    edges: list[Edge] | None = None
+
+
+class MemoryType(str, Enum):
+    shared = "shared"
+    team = "team"
+    individual = "individual"
+
+
+class Memory(BaseModel):
+    id: str = Field(default_factory=lambda: str(uuid4()))
+    name: str
+    type: MemoryType
+    content: str
+    access: list[str] = Field(default_factory=list)  # 可访问的智能体 ID 列表
+    created_at: str = Field(default_factory=utc_now)
+
+
+class CreateMemoryRequest(BaseModel):
+    name: str
+    type: MemoryType
+    content: str
+    access: list[str] = Field(default_factory=list)
+
+
+class MemoryListResponse(BaseModel):
+    memories: list[Memory]
+

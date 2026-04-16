@@ -155,6 +155,7 @@ const WorkflowCanvas = forwardRef<HTMLDivElement, WorkflowCanvasProps>(({
       style={{
         transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
         transformOrigin: '0 0',
+        transition: 'transform 0.1s ease-out',
       }}
       onMouseDown={handleCanvasMouseDown}
       onMouseMove={handleMouseMove}
