@@ -164,7 +164,6 @@ export default function ReactFlowWorkflowCanvas({
         }}
         panOnScroll={true}
         panOnDrag={true}
-        zoomOnWheel={true}
         zoomOnDoubleClick={true}
         minZoom={0.5}
         maxZoom={2}

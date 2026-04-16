@@ -315,57 +315,59 @@ export default function OrchestrationPage() {
   }, [relationships]);
 
   return (
-    <div className="orchestration-workspace">
-      <Toolbar zoom={zoom} onZoom={handleZoom} onRunWorkflow={handleRunWorkflow} />
-      <div className="workflow-container">
-        <NodeLibrary onAddNode={handleNodeAdd} />
-        <ReactFlowWorkflowCanvas
-          nodes={nodes}
-          edges={edges}
-          selectedNode={selectedNode}
-          onNodeSelect={handleNodeSelect}
-          onNodeUpdate={handleNodeUpdate}
-          onNodeDelete={handleNodeDelete}
-          onEdgeAdd={handleEdgeAdd}
-          onEdgeDelete={handleEdgeDelete}
-          onAddNode={handleNodeAdd}
-          zoom={zoom}
-          pan={pan}
-          onPan={handlePan}
-        />
-        <div className="right-panel">
-          <NodeInspector
-            node={selectedNode}
-            onUpdate={handleNodeUpdate}
-            onDelete={handleNodeDelete}
+    <ReactFlowProvider>
+      <div className="orchestration-workspace">
+        <Toolbar zoom={zoom} onZoom={handleZoom} onRunWorkflow={handleRunWorkflow} />
+        <div className="workflow-container">
+          <NodeLibrary onAddNode={handleNodeAdd} />
+          <ReactFlowWorkflowCanvas
+            nodes={nodes}
+            edges={edges}
+            selectedNode={selectedNode}
+            onNodeSelect={handleNodeSelect}
+            onNodeUpdate={handleNodeUpdate}
+            onNodeDelete={handleNodeDelete}
+            onEdgeAdd={handleEdgeAdd}
+            onEdgeDelete={handleEdgeDelete}
+            onAddNode={handleNodeAdd}
+            zoom={zoom}
+            pan={pan}
+            onPan={handlePan}
           />
-          <MemoryManagement
-            agents={nodes.map(node => ({
-              id: node.id,
-              name: node.data.name,
-              type: node.type,
-              description: node.data.description,
-              capabilities: node.data.capabilities,
-            }))}
-            memories={memories}
-            onAddMemory={handleAddMemory}
-            onUpdateMemory={handleUpdateMemory}
-            onDeleteMemory={handleDeleteMemory}
-          />
-          <TeamRelationships
-            agents={nodes.map(node => ({
-              id: node.id,
-              name: node.data.name,
-              type: node.type,
-              description: node.data.description,
-              capabilities: node.data.capabilities,
-            }))}
-            relationships={relationships}
-            onAddRelationship={handleAddRelationship}
-            onDeleteRelationship={handleDeleteRelationship}
-          />
+          <div className="right-panel">
+            <NodeInspector
+              node={selectedNode}
+              onUpdate={handleNodeUpdate}
+              onDelete={handleNodeDelete}
+            />
+            <MemoryManagement
+              agents={nodes.map(node => ({
+                id: node.id,
+                name: node.data.name,
+                type: node.type,
+                description: node.data.description,
+                capabilities: node.data.capabilities,
+              }))}
+              memories={memories}
+              onAddMemory={handleAddMemory}
+              onUpdateMemory={handleUpdateMemory}
+              onDeleteMemory={handleDeleteMemory}
+            />
+            <TeamRelationships
+              agents={nodes.map(node => ({
+                id: node.id,
+                name: node.data.name,
+                type: node.type,
+                description: node.data.description,
+                capabilities: node.data.capabilities,
+              }))}
+              relationships={relationships}
+              onAddRelationship={handleAddRelationship}
+              onDeleteRelationship={handleDeleteRelationship}
+            />
+          </div>
         </div>
       </div>
-    </div>
+    </ReactFlowProvider>
   );
 }
