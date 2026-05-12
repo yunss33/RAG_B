@@ -1,0 +1,42 @@
+# Service Manager - Docker Compose Configuration
+
+version: '3.8'
+
+services:
+  service-manager-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3001"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./data:/app/data
+      - ./compose:/app/compose
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_PATH=/app/data/service-manager.db
+      - DOCKER_SOCKET=/var/run/docker.sock
+      - COMPOSE_FILES_DIR=/app/compose
+    restart: unless-stopped
+    networks:
+      - service-manager-network
+
+  service-manager-frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:3001/api
+    depends_on:
+      - service-manager-server
+    restart: unless-stopped
+    networks:
+      - service-manager-network
+
+networks:
+  service-manager-network:
+    driver: bridge
