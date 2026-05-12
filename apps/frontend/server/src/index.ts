@@ -23,8 +23,6 @@ async function start() {
       timeWindow: '1 minute',
     });
 
-    database.initialize();
-
     await fastify.register(projectsRoutes, { prefix: '/api/projects' });
     await fastify.register(dockerRoutes, { prefix: '/api/docker' });
     await fastify.register(systemRoutes, { prefix: '/api/system' });
