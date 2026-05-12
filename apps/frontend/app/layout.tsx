@@ -1,32 +1,28 @@
-import "./globals.css";
-import Link from "next/link";
-import type { Metadata } from "next";
+import type { Metadata } from 'next';
+import { Inter, Outfit } from 'next/font/google';
+import './globals.css';
+import { Providers } from './providers';
+
+const inter = Inter({ subsets: ['latin'], variable: '--font-inter' });
+const outfit = Outfit({ subsets: ['latin'], variable: '--font-outfit' });
 
 export const metadata: Metadata = {
-  title: "DeepBS MVP",
-  description: "标书多智能体 MVP 工作台"
+  title: 'ServiceHub - 服务管理系统',
+  description: '轻量级服务管理和 Docker 部署平台',
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="zh-CN">
-      <body>
-        <div className="page">
-          <div className="hero">
-            <div className="pill">单租户内部版 / 中文优先 / Human in the Loop</div>
-            <h1>DeepBS 标书多智能体工作台</h1>
-            <p className="muted">
-              打通招标解析、RAG、章节写作、审查、图片选择与 HTML 成稿的最小闭环。
-            </p>
-            <div className="actions">
-              <Link className="button" href="/">项目列表</Link>
-              <Link className="button secondary" href="/projects/new">创建项目</Link>
-            </div>
-          </div>
+    <html lang="zh-CN" className={`${inter.variable} ${outfit.variable}`}>
+      <body className="font-sans antialiased">
+        <Providers>
           {children}
-        </div>
+        </Providers>
       </body>
     </html>
   );
 }
-
